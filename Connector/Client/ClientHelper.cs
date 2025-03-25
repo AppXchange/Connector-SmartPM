@@ -29,7 +29,11 @@ namespace Connector.Client
                     serviceCollection.AddSingleton<IApiKeyAuth>(configApiKeyAuth!);
                     serviceCollection.AddTransient<RetryPolicyHandler>();
                     serviceCollection.AddTransient<ApiKeyAuthHandler>();
-                    serviceCollection.AddHttpClient<ApiClient, ApiClient>(client => new ApiClient(client, configApiKeyAuth!.BaseUrl)).AddHttpMessageHandler<ApiKeyAuthHandler>().AddHttpMessageHandler<RetryPolicyHandler>();
+                    serviceCollection.AddHttpClient<ApiClient, ApiClient>(client => 
+                    {
+                        var config = serviceCollection.BuildServiceProvider().GetRequiredService<ConnectorRegistrationConfig>();
+                        return new ApiClient(client, configApiKeyAuth!, config);
+                    }).AddHttpMessageHandler<ApiKeyAuthHandler>().AddHttpMessageHandler<RetryPolicyHandler>();
                     break;
                 default:
                     throw new Exception($"Unable to find services for definition key {activeConnection.DefinitionKey}");

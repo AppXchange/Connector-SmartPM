@@ -42,7 +42,7 @@ public class ProjectWorkBreakdownStructureDataObject
 
     [JsonPropertyName("children")]
     [Description("List of child WBS elements")]
-    public List<ProjectWorkBreakdownStructureDataObject> Children { get; init; } = new();
+    public List<ProjectWorkBreakdownStructureChildDataObject> Children { get; init; } = new();
 
     [JsonPropertyName("metadata")]
     [Description("Additional metadata associated with the WBS element")]
@@ -52,4 +52,29 @@ public class ProjectWorkBreakdownStructureDataObject
     [Description("ID of the project this WBS element belongs to")]
     [Required]
     public int ProjectId { get; init; }
+}
+
+/// <summary>
+/// Simplified data object for child WBS elements to avoid circular references
+/// </summary>
+public class ProjectWorkBreakdownStructureChildDataObject
+{
+    [JsonPropertyName("id")]
+    [Description("Unique identifier for the child WBS element")]
+    [Required]
+    public string Id { get; init; } = string.Empty;
+
+    [JsonPropertyName("code")]
+    [Description("WBS code for the child element")]
+    [Required]
+    public string Code { get; init; } = string.Empty;
+
+    [JsonPropertyName("name")]
+    [Description("Name of the child WBS element")]
+    [Required]
+    public string Name { get; init; } = string.Empty;
+
+    [JsonPropertyName("level")]
+    [Description("Hierarchical level of the child WBS element")]
+    public int Level { get; init; }
 }

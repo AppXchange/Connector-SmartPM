@@ -51,10 +51,11 @@ public class ImportFileDataReader : TypedAsyncDataReaderBase<ImportFileDataObjec
                 throw new Exception($"Failed to retrieve records for 'ImportFileDataObject'. API StatusCode: {response.StatusCode}");
             }
 
-            if (response.Data == null || !response.Data.Items.Any()) break;
+            var data = response.GetData();
+            if (data == null || !data.Items.Any()) break;
 
             // Return the data objects to Cache.
-            foreach (var item in response.Data.Items)
+            foreach (var item in data.Items)
             {
                 // If new class was created to match the API response, create a new ImportFileDataObject object, map the properties and return a ImportFileDataObject.
 
@@ -69,7 +70,7 @@ public class ImportFileDataReader : TypedAsyncDataReaderBase<ImportFileDataObjec
 
             // Handle pagination per API client design
             _currentPage++;
-            if (_currentPage >= response.Data.TotalPages)
+            if (_currentPage >= data.TotalPages)
             {
                 break;
             }

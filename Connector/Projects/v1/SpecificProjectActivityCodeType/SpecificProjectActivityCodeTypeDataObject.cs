@@ -20,7 +20,7 @@ public class SpecificProjectActivityCodeTypeDataObject
 
     [JsonPropertyName("parent")]
     [Description("Parent activity code, if any")]
-    public SpecificProjectActivityCodeTypeDataObject? Parent { get; init; }
+    public ActivityCodeParentReference? Parent { get; init; }
 
     [JsonPropertyName("value")]
     [Description("Value of the activity code")]
@@ -41,5 +41,45 @@ public class SpecificProjectActivityCodeTypeDataObject
 
     [JsonPropertyName("children")]
     [Description("Child activity codes, if any")]
-    public List<SpecificProjectActivityCodeTypeDataObject> Children { get; init; } = new();
+    public List<ActivityCodeChildReference> Children { get; init; } = new();
+}
+
+/// <summary>
+/// Reference to a parent activity code to avoid circular references
+/// </summary>
+public class ActivityCodeParentReference
+{
+    [JsonPropertyName("id")]
+    [Description("Unique identifier for the parent activity code")]
+    [Required]
+    public int Id { get; init; }
+
+    [JsonPropertyName("value")]
+    [Description("Value of the parent activity code")]
+    [Required]
+    public string Value { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Reference to a child activity code to avoid circular references
+/// </summary>
+public class ActivityCodeChildReference
+{
+    [JsonPropertyName("id")]
+    [Description("Unique identifier for the child activity code")]
+    [Required]
+    public int Id { get; init; }
+
+    [JsonPropertyName("value")]
+    [Description("Value of the child activity code")]
+    [Required]
+    public string Value { get; init; } = string.Empty;
+
+    [JsonPropertyName("sequenceNumber")]
+    [Description("Sequence number for ordering")]
+    public int SequenceNumber { get; init; }
+
+    [JsonPropertyName("order")]
+    [Description("Order within the activity code type")]
+    public int Order { get; init; }
 }
