@@ -1,0 +1,120 @@
+{
+  "name": "SmartPM",
+  "urlPart": "smart-pm",
+  "key": "smart-pm",
+  "description": "",
+  "modules": [
+    {
+      "id": "projects-1",
+      "name": "Projects",
+      "urlPart": "projects",
+      "key": "projects",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "scenario-1",
+      "name": "Scenario",
+      "urlPart": "scenario",
+      "key": "scenario",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "activity-1",
+      "name": "Activity",
+      "urlPart": "activity",
+      "key": "activity",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "import-1",
+      "name": "Import",
+      "urlPart": "import",
+      "key": "import",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "user-1",
+      "name": "User",
+      "urlPart": "user",
+      "key": "user",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "externalreference-1",
+      "name": "External Reference",
+      "urlPart": "externalreference",
+      "key": "externalreference",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "schedules-1",
+      "name": "Schedules",
+      "urlPart": "schedules",
+      "key": "schedules",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "company-1",
+      "name": "Company",
+      "urlPart": "company",
+      "key": "company",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "schedulequality-1",
+      "name": "Schedule Quality",
+      "urlPart": "schedulequality",
+      "key": "schedulequality",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "changelog-1",
+      "name": "Change Log",
+      "urlPart": "changelog",
+      "key": "changelog",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "delay-1",
+      "name": "Delay",
+      "urlPart": "delay",
+      "key": "delay",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "reporting-1",
+      "name": "Reporting",
+      "urlPart": "reporting",
+      "key": "reporting",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "companymetrics-1",
+      "name": "Company Metrics",
+      "urlPart": "companymetrics",
+      "key": "companymetrics",
+      "description": "",
+      "version": 1
+    },
+    {
+      "id": "model-1",
+      "name": "Model",
+      "urlPart": "model",
+      "key": "model",
+      "description": "",
+      "version": 1
+    }
+  ]
+}

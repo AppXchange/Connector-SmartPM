@@ -1,0 +1,211 @@
+https://developers.smartpmtech.com/
+
+
+# Build
+cd desktop/connectors
+mkdir connector-smartpm
+cd connector-smartpm
+xchange connector new --name SmartPM
+cd connector
+
+
+______
+
+
+# Auth
+https://developers.smartpmtech.com/#section/Authentication/API-Key-Authentication
+xchange client new --type Http --auth-type ApiKey
+
+*** configure Company ID
+
+______
+
+
+## Module 1: Projects
+https://developers.smartpmtech.com/#tag/Project
+xchange module new --id projects-1 --name Projects --key projects --version 1
+https://developers.smartpmtech.com/#operation/get-projects
+xchange data-object new --module-id projects-1 --name Projects
+https://developers.smartpmtech.com/#operation/get-project
+xchange data-object new --module-id projects-1 --name Project
+https://developers.smartpmtech.com/#operation/create-project
+xchange action new --module-id projects-1 --object-name Project --name Create
+https://developers.smartpmtech.com/#operation/delete-public-v1-projects-projectId
+xchange action new --module-id projects-1 --object-name Project --name Delete
+https://developers.smartpmtech.com/#operation/update-project-metadata
+xchange action new --module-id projects-1 --object-name Project --name UpdateMetadata
+https://developers.smartpmtech.com/#operation/get-project-notes
+xchange data-object new --module-id projects-1 --name ProjectComments
+https://developers.smartpmtech.com/#operation/create-project-note
+xchange action new --module-id projects-1 --object-name ProjectComments --name Create
+https://developers.smartpmtech.com/#operation/get-public-v1-projects-projectId-calendars
+xchange data-object new --module-id projects-1 --name ProjectCalendars
+https://developers.smartpmtech.com/#operation/get-public-v1-projects-projectId-calendar-calendarId
+xchange data-object new --module-id projects-1 --name ProjectCalendar
+https://developers.smartpmtech.com/#operation/get-public-v1-projects-projectId-wbs
+xchange data-object new --module-id projects-1 --name ProjectWorkBreakdownStructure
+https://developers.smartpmtech.com/#operation/get-public-v1-projects-projectId-activityCodeType
+xchange data-object new --module-id projects-1 --name ProjectActivityCodeTypes
+https://developers.smartpmtech.com/#operation/get-public-v1-projects-projectId-activityCodeType-activityCodeTypeId-activityCodes-activityCodeId
+xchange data-object new --module-id projects-1 --name SpecificProjectActivityCodeType
+https://developers.smartpmtech.com/#operation/get-public-v1-projects-projectId-wbs-wbsId
+xchange data-object new --module-id projects-1 --name ProjectWorkBreakdownStructureElement
+
+
+## Module 2: Scenario
+https://developers.smartpmtech.com/#tag/Scenario
+xchange module new --id scenario-1 --name Scenario --key scenario --version 1
+https://developers.smartpmtech.com/#operation/get-scenarios
+xchange data-object new --module-id scenario-1 --name Scenarios
+https://developers.smartpmtech.com/#operation/get-scenario-details
+xchange data-object new --module-id scenario-1 --name ScenarioDetails
+https://developers.smartpmtech.com/#operation/get-percent-complete-curve
+xchange data-object new --module-id scenario-1 --name PrecentCompleteCurve
+https://developers.smartpmtech.com/#operation/get-percent-complete-curve-v2
+xchange data-object new --module-id scenario-1 --name PrecentCompleteCurvev2
+https://developers.smartpmtech.com/#operation/get-earned-schedule-curve
+xchange data-object new --module-id scenario-1 --name EarnedScheduleCurve
+https://developers.smartpmtech.com/#operation/get-schedule-compression
+xchange data-object new --module-id scenario-1 --name ScheduleCompression
+https://developers.smartpmtech.com/#operation/get-project-health
+xchange data-object new --module-id scenario-1 --name ProjectHealth
+https://developers.smartpmtech.com/#operation/get-project-health-trend
+xchange data-object new --module-id scenario-1 --name ProjectHealthTrend
+https://developers.smartpmtech.com/#operation/get-public-v1-projects-projectId-scenarios-scenarioId-schedule-compression-trend
+xchange data-object new --module-id scenario-1 --name ScheduleCompressionTrend
+https://developers.smartpmtech.com/#operation/get-public-v1-projects-projectId-scenarios-scenarioId-schedule-performance-index
+xchange data-object new --module-id scenario-1 --name SchedulePerformanceIndex
+https://developers.smartpmtech.com/#operation/get-public-v1-projects-projectId-scenarios-scenarioId-schedule-performance-index-trend
+xchange data-object new --module-id scenario-1 --name SchedulePerformanceIndexTrend
+
+
+
+
+## Module 3: Activity
+https://developers.smartpmtech.com/#tag/Activity
+xchange module new --id activity-1 --name Activity --key activity --version 1
+https://developers.smartpmtech.com/#operation/get-activities
+xchange data-object new --module-id activity-1 --name Activities
+
+
+
+
+## Module 4: Import
+https://developers.smartpmtech.com/#tag/Import
+xchange module new --id import-1 --name Import --key import --version 1
+https://developers.smartpmtech.com/#operation/import-file
+xchange data-object new --module-id import-1 --name ImportFile
+xchange action new --module-id import-1 --object-name ImportFile --name Import
+https://developers.smartpmtech.com/#operation/get-import-status
+xchange data-object new --module-id import-1 --name ImportStatus
+https://developers.smartpmtech.com/#operation/upload-file
+xchange data-object new --module-id import-1 --name UploadFile
+xchange action new --module-id import-1 --object-name UploadFile --name Upload
+
+
+## Module 5: User
+https://developers.smartpmtech.com/#tag/User
+xchange module new --id user-1 --name User --key user --version 1
+https://developers.smartpmtech.com/#operation/get-users
+xchange data-object new --module-id user-1 --name Users
+https://developers.smartpmtech.com/#operation/create-user
+xchange action new --module-id user-1 --object-name Users --name Add
+https://developers.smartpmtech.com/#operation/remove-project-user
+xchange action new --module-id user-1 --object-name Users --name Remove
+https://developers.smartpmtech.com/#operation/update-project-user
+xchange action new --module-id user-1 --object-name Users --name Update
+https://developers.smartpmtech.com/#operation/get-company-users
+xchange data-object new --module-id user-1 --name CompanyUsers
+https://developers.smartpmtech.com/#operation/create-company-user
+xchange action new --module-id user-1 --object-name CompanyUsers --name Create
+https://developers.smartpmtech.com/#operation/update-company-user
+xchange action new --module-id user-1 --object-name CompanyUsers --name Update
+https://developers.smartpmtech.com/#operation/delete-company-user
+xchange action new --module-id user-1 --object-name CompanyUsers --name Delete
+
+
+## Module 6: ExternalReference
+https://developers.smartpmtech.com/#tag/External-Reference
+xchange module new --id externalreference-1 --name ExternalReference --key externalreference --version 1
+https://developers.smartpmtech.com/#operation/get-external-references
+xchange data-object new --module-id externalreference-1 --name ExternalReference
+https://developers.smartpmtech.com/#operation/add-external-reference
+xchange action new --module-id externalreference-1 --object-name ExternalReference --name Add
+
+## Module 7: Schedules
+https://developers.smartpmtech.com/#tag/Schedules
+xchange module new --id schedules-1 --name Schedules --key schedules --version 1
+https://developers.smartpmtech.com/#operation/get-scenario-schedules
+xchange data-object new --module-id schedules-1 --name ScenarioSchedules
+https://developers.smartpmtech.com/#operation/get-scenario-schedules-v2
+xchange data-object new --module-id schedules-1 --name ScenarioSchedulesv2
+
+## Module 8: Company
+https://developers.smartpmtech.com/#tag/Company
+xchange module new --id company-1 --name Company --key company --version 1
+https://developers.smartpmtech.com/#operation/get-company-configuration
+xchange data-object new --module-id company-1 --name CompanyConfig
+https://developers.smartpmtech.com/#operation/update-company-configuration
+xchange action new --module-id company-1 --object-name CompanyConfig --name Update
+
+
+## Module 9: Schedule Quality
+https://developers.smartpmtech.com/#tag/Schedule-Quality
+xchange module new --id schedulequality-1 --name ScheduleQuality --key schedulequality --version 1
+https://developers.smartpmtech.com/#operation/get-schedule-quality
+xchange data-object new --module-id schedulequality-1 --name ScheduleQuality
+https://developers.smartpmtech.com/#operation/get-schedule-quality-metric-details
+xchange data-object new --module-id schedulequality-1 --name ScheduleQualityMetricDetails
+https://developers.smartpmtech.com/#operation/get-all-quality-profiles
+xchange data-object new --module-id schedulequality-1 --name AllQualityProfiles
+https://developers.smartpmtech.com/#operation/get-quality-profile
+xchange data-object new --module-id schedulequality-1 --name QualityProfile
+
+## Module 10: Change Log
+https://developers.smartpmtech.com/#tag/Change-Log
+xchange module new --id changelog-1 --name ChangeLog --key changelog --version 1
+https://developers.smartpmtech.com/#operation/get-change-log-sumamry
+xchange data-object new --module-id changelog-1 --name ChangeLogSummary
+https://developers.smartpmtech.com/#operation/get-change-log-details-for-type
+xchange data-object new --module-id changelog-1 --name ChangeLogDetails
+https://developers.smartpmtech.com/#operation/get-all-change-log-details
+xchange data-object new --module-id changelog-1 --name AllChangeLogDetails
+
+## Module 11: Delay
+https://developers.smartpmtech.com/#tag/Delay
+xchange module new --id delay-1 --name Delay --key delay --version 1
+https://developers.smartpmtech.com/#operation/get-delay-table
+xchange data-object new --module-id delay-1 --name DelayTable
+
+
+## Module 11: Reporting
+https://developers.smartpmtech.com/#tag/Reporting
+xchange module new --id reporting-1 --name Reporting --key reporting --version 1
+https://developers.smartpmtech.com/#operation/get-should-start-finish-report
+xchange data-object new --module-id reporting-1 --name ShouldStartFinishReport
+https://developers.smartpmtech.com/#operation/get-should-start-finish-trend
+xchange data-object new --module-id reporting-1 --name ShouldStartFinishTrend
+https://developers.smartpmtech.com/#operation/get-velocity
+xchange data-object new --module-id reporting-1 --name MonthlyDistribution
+
+## Module 12: Company Metrics
+https://developers.smartpmtech.com/#tag/Company-Metrics
+xchange module new --id companymetrics-1 --name CompanyMetrics --key companymetrics --version 1
+https://developers.smartpmtech.com/#operation/get-company-trends-health
+xchange data-object new --module-id companymetrics-1 --name CompanyHealthTrend
+https://developers.smartpmtech.com/#operation/get-company-trends-quality
+xchange data-object new --module-id companymetrics-1 --name CompanyQualityTrend
+https://developers.smartpmtech.com/#operation/get-company-trends-compression
+xchange data-object new --module-id companymetrics-1 --name CompanyCompressionTrend
+https://developers.smartpmtech.com/#operation/get-company-trends-metric-metricType
+xchange data-object new --module-id companymetrics-1 --name CompanyMetricTrend
+
+## Module 13: Model
+https://developers.smartpmtech.com/#tag/Model
+xchange module new --id model-1 --name Model --key model --version 1
+https://developers.smartpmtech.com/#operation/get-public-v1-projects-projectId-models
+xchange data-object new --module-id model-1 --name Models
+
+
+
+
