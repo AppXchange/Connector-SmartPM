@@ -1,16 +1,30 @@
-using System.IO;
+using System.Net;
 
 namespace Connector.Client;
 
+/// <summary>
+/// Base response class for API calls
+/// </summary>
 public class ApiResponse
 {
-    public bool IsSuccessful { get; init; }
-    public int StatusCode { get; init; }
-    // Not safe to read if `Data` is not null
-    public Stream? RawResult { get; init; }
+    public bool IsSuccessful { get; set; }
+    public HttpStatusCode StatusCode { get; set; }
+    public string? ErrorMessage { get; set; }
 }
 
-public class ApiResponse<TResult> : ApiResponse
+/// <summary>
+/// Generic response class for API calls with typed data
+/// </summary>
+/// <typeparam name="TResult">The type of data returned by the API</typeparam>
+public sealed class ApiResponse<TResult> : ApiResponse
 {
-    public TResult? Data { get; init; }
+    private TResult? _data;
+
+    public ApiResponse()
+    {
+    }
+
+    public TResult? GetData() => _data;
+
+    internal void SetData(TResult? value) => _data = value;
 }

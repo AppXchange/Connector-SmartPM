@@ -2,6 +2,7 @@ using Connector.Client;
 using ESR.Hosting.Action;
 using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
@@ -16,68 +17,108 @@ namespace Connector.Projects.v1.Project.Delete;
 public class DeleteProjectHandler : IActionHandler<DeleteProjectAction>
 {
     private readonly ILogger<DeleteProjectHandler> _logger;
+    private readonly IApiClient _apiClient;
 
     public DeleteProjectHandler(
-        ILogger<DeleteProjectHandler> logger)
+        ILogger<DeleteProjectHandler> logger,
+        IApiClient apiClient)
     {
         _logger = logger;
+        _apiClient = apiClient;
     }
     
     public async Task<ActionHandlerOutcome> HandleQueuedActionAsync(ActionInstance actionInstance, CancellationToken cancellationToken)
     {
         var input = JsonSerializer.Deserialize<DeleteProjectActionInput>(actionInstance.InputJson);
+        if (input == null)
+        {
+            return ActionHandlerOutcome.Failed(new StandardActionFailure
+            {
+                Code = "400",
+                Errors = new[]
+                {
+                    new Xchange.Connector.SDK.Action.Error
+                    {
+                        Source = new[] { "DeleteProjectHandler" },
+                        Text = "Invalid input data"
+                    }
+                }
+            });
+        }
+
         try
         {
-            // Given the input for the action, make a call to your API/system
-            var response = new ApiResponse<DeleteProjectActionOutput>();
-            // response = await _apiClient.PostProjectDataObject(input, cancellationToken)
-            // .ConfigureAwait(false);
+            var response = await _apiClient.DeleteProjectAsync(input.ProjectId, cancellationToken)
+                .ConfigureAwait(false);
 
-            // The full record is needed for SyncOperations. If the endpoint used for the action returns a partial record (such as only returning the ID) then you can either:
-            // - Make a GET call using the ID that was returned
-            // - Add the ID property to your action input (Assuming this results in the proper data object shape)
+            if (!response.IsSuccessful)
+            {
+                return ActionHandlerOutcome.Failed(new StandardActionFailure
+                {
+                    Code = ((int)response.StatusCode).ToString(),
+                    Errors = new[]
+                    {
+                        new Xchange.Connector.SDK.Action.Error
+                        {
+                            Source = new[] { "DeleteProjectHandler" },
+                            Text = response.ErrorMessage ?? "Failed to delete project"
+                        }
+                    }
+                });
+            }
 
-            // var resource = await _apiClient.GetProjectDataObject(response.Data.id, cancellationToken);
+            var output = new DeleteProjectActionOutput
+            {
+                Success = true,
+                Message = "Project successfully deleted"
+            };
 
-            // var resource = new DeleteProjectActionOutput
-            // {
-            //      TODO : map
-            // };
-
-            // If the response is already the output object for the action, you can use the response directly
-
-            // Build sync operations to update the local cache as well as the Xchange cache system (if the data type is cached)
-            // For more information on SyncOperations and the KeyResolver, check: https://trimble-xchange.github.io/connector-docs/guides/creating-actions/#keyresolver-and-the-sync-cache-operations
+            // Create sync operation to remove the project from cache
             var operations = new List<SyncOperation>();
             var keyResolver = new DefaultDataObjectKey();
-            var key = keyResolver.BuildKeyResolver()(response.Data);
-            operations.Add(SyncOperation.CreateSyncOperation(UpdateOperation.Upsert.ToString(), key.UrlPart, key.PropertyNames, response.Data));
+            var key = keyResolver.BuildKeyResolver()(new ProjectDataObject { Id = int.Parse(input.ProjectId) });
+            operations.Add(SyncOperation.CreateSyncOperation(UpdateOperation.Delete.ToString(), key.UrlPart, key.PropertyNames, null));
 
             var resultList = new List<CacheSyncCollection>
             {
-                new CacheSyncCollection() { DataObjectType = typeof(ProjectDataObject), CacheChanges = operations.ToArray() }
+                new() { DataObjectType = typeof(ProjectDataObject), CacheChanges = operations.ToArray() }
             };
 
-            return ActionHandlerOutcome.Successful(response.Data, resultList);
+            return ActionHandlerOutcome.Successful(output, resultList);
         }
         catch (HttpRequestException exception)
         {
-            // If an error occurs, we want to create a failure result for the action that matches
-            // the failure type for the action. 
-            // Common to create extension methods to map to Standard Action Failure
-
             var errorSource = new List<string> { "DeleteProjectHandler" };
-            if (string.IsNullOrEmpty(exception.Source)) errorSource.Add(exception.Source!);
+            if (!string.IsNullOrEmpty(exception.Source))
+            {
+                errorSource.Add(exception.Source);
+            }
             
             return ActionHandlerOutcome.Failed(new StandardActionFailure
             {
                 Code = exception.StatusCode?.ToString() ?? "500",
-                Errors = new []
+                Errors = new[]
                 {
                     new Xchange.Connector.SDK.Action.Error
                     {
                         Source = errorSource.ToArray(),
                         Text = exception.Message
+                    }
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while deleting project");
+            return ActionHandlerOutcome.Failed(new StandardActionFailure
+            {
+                Code = "500",
+                Errors = new[]
+                {
+                    new Xchange.Connector.SDK.Action.Error
+                    {
+                        Source = new[] { "DeleteProjectHandler" },
+                        Text = "An unexpected error occurred"
                     }
                 }
             });

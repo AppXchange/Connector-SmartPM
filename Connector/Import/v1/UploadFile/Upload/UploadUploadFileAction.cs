@@ -1,24 +1,17 @@
 namespace Connector.Import.v1.UploadFile.Upload;
 
 using Json.Schema.Generation;
-using System;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.Action;
 
 /// <summary>
-/// Action object that will represent an action in the Xchange system. This will contain an input object type,
-/// an output object type, and a Action failure type (this will default to <see cref="StandardActionFailure"/>
-/// but that can be overridden with your own preferred type). These objects will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Action for uploading files to SmartPM
 /// </summary>
-[Description("UploadUploadFileAction Action description goes here")]
-public class UploadUploadFileAction : IStandardAction<UploadUploadFileActionInput, UploadUploadFileActionOutput>
+[Description("Upload a file to SmartPM for later import")]
+public class UploadUploadFileAction : IStandardAction<UploadUploadFileActionInput, UploadFileDataObject>
 {
     public UploadUploadFileActionInput ActionInput { get; set; } = new();
-    public UploadUploadFileActionOutput ActionOutput { get; set; } = new();
+    public UploadFileDataObject ActionOutput { get; set; } = new();
     public StandardActionFailure ActionFailure { get; set; } = new();
 
     public bool CreateRtap => true;
@@ -26,11 +19,13 @@ public class UploadUploadFileAction : IStandardAction<UploadUploadFileActionInpu
 
 public class UploadUploadFileActionInput
 {
+    [JsonPropertyName("fileUrl")]
+    [Description("URL of the file to upload")]
+    [Required]
+    public string FileUrl { get; set; } = string.Empty;
 
-}
-
-public class UploadUploadFileActionOutput
-{
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    [JsonPropertyName("fileName")]
+    [Description("Name of the file being uploaded")]
+    [Required]
+    public string FileName { get; set; } = string.Empty;
 }

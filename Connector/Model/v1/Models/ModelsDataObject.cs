@@ -6,19 +6,49 @@ using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.CacheWriter;
 
 /// <summary>
-/// Data object that will represent an object in the Xchange system. This will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Data object representing model information from the SmartPM API.
 /// </summary>
 [PrimaryKey("id", nameof(Id))]
 //[AlternateKey("alt-key-id", nameof(CompanyId), nameof(EquipmentNumber))]
-[Description("Example description of the object.")]
+[Description("SmartPM Model data object representing project model information.")]
 public class ModelsDataObject
 {
     [JsonPropertyName("id")]
-    [Description("Example primary key of the object")]
+    [Description("The unique identifier for the model")]
     [Required]
-    public required Guid Id { get; init; }
+    public int Id { get; init; }
+
+    [JsonPropertyName("name")]
+    [Description("The name of the model")]
+    [Required]
+    public string Name { get; init; } = string.Empty;
+
+    [JsonPropertyName("description")]
+    [Description("Optional description of the model")]
+    public string? Description { get; init; }
+
+    [JsonPropertyName("isAutoUpdate")]
+    [Description("Whether the model auto-updates")]
+    [Required]
+    public bool IsAutoUpdate { get; init; }
+
+    [JsonPropertyName("isOriginalModel")]
+    [Description("Whether this is the original model")]
+    [Required]
+    public bool IsOriginalModel { get; init; }
+
+    [JsonPropertyName("isArchived")]
+    [Description("Whether the model is archived")]
+    [Required]
+    public bool IsArchived { get; init; }
+
+    [JsonPropertyName("modelType")]
+    [Description("The type of model (BASELINE, ADVANCED_MODEL, TEST_WORKWEEK, REMOVE_RESOURCES, EXCLUDE_PROGRESS)")]
+    [Required]
+    public string ModelType { get; init; } = string.Empty;
+
+    [JsonPropertyName("initialDataDate")]
+    [Description("The initial data date of the model")]
+    [Required]
+    public DateTime InitialDataDate { get; init; }
 }

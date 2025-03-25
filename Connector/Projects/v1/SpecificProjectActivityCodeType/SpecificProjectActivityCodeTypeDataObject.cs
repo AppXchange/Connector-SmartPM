@@ -1,24 +1,45 @@
 namespace Connector.Projects.v1.SpecificProjectActivityCodeType;
 
 using Json.Schema.Generation;
-using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.CacheWriter;
 
 /// <summary>
-/// Data object that will represent an object in the Xchange system. This will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Data object representing a specific activity code from a project's activity code type
 /// </summary>
 [PrimaryKey("id", nameof(Id))]
 //[AlternateKey("alt-key-id", nameof(CompanyId), nameof(EquipmentNumber))]
-[Description("Example description of the object.")]
+[Description("SmartPM Specific Project Activity Code Type data object representing a single activity code within an activity code type.")]
 public class SpecificProjectActivityCodeTypeDataObject
 {
     [JsonPropertyName("id")]
-    [Description("Example primary key of the object")]
+    [Description("Unique identifier for the activity code")]
     [Required]
-    public required Guid Id { get; init; }
+    public int Id { get; init; }
+
+    [JsonPropertyName("parent")]
+    [Description("Parent activity code, if any")]
+    public SpecificProjectActivityCodeTypeDataObject? Parent { get; init; }
+
+    [JsonPropertyName("value")]
+    [Description("Value of the activity code")]
+    [Required]
+    public string Value { get; init; } = string.Empty;
+
+    [JsonPropertyName("desc")]
+    [Description("Description of the activity code")]
+    public string Description { get; init; } = string.Empty;
+
+    [JsonPropertyName("sequenceNumber")]
+    [Description("Sequence number for ordering")]
+    public int SequenceNumber { get; init; }
+
+    [JsonPropertyName("order")]
+    [Description("Order within the activity code type")]
+    public int Order { get; init; }
+
+    [JsonPropertyName("children")]
+    [Description("Child activity codes, if any")]
+    public List<SpecificProjectActivityCodeTypeDataObject> Children { get; init; } = new();
 }

@@ -1,20 +1,13 @@
 namespace Connector.User.v1.CompanyUsers.Delete;
 
 using Json.Schema.Generation;
-using System;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.Action;
 
 /// <summary>
-/// Action object that will represent an action in the Xchange system. This will contain an input object type,
-/// an output object type, and a Action failure type (this will default to <see cref="StandardActionFailure"/>
-/// but that can be overridden with your own preferred type). These objects will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Action for deleting a company user in SmartPM
 /// </summary>
-[Description("DeleteCompanyUsersAction Action description goes here")]
+[Description("Delete an existing company user")]
 public class DeleteCompanyUsersAction : IStandardAction<DeleteCompanyUsersActionInput, DeleteCompanyUsersActionOutput>
 {
     public DeleteCompanyUsersActionInput ActionInput { get; set; } = new();
@@ -24,13 +17,30 @@ public class DeleteCompanyUsersAction : IStandardAction<DeleteCompanyUsersAction
     public bool CreateRtap => true;
 }
 
+/// <summary>
+/// Input model for deleting a company user
+/// </summary>
 public class DeleteCompanyUsersActionInput
 {
-
+    [JsonPropertyName("userId")]
+    [Description("The ID of the user to delete")]
+    [Required]
+    [MinLength(1)]
+    public string UserId { get; init; } = string.Empty;
 }
 
+/// <summary>
+/// Output model containing the deletion status
+/// </summary>
 public class DeleteCompanyUsersActionOutput
 {
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    [JsonPropertyName("success")]
+    [Description("Whether the user was successfully deleted")]
+    [Required]
+    public bool Success { get; init; }
+
+    [JsonPropertyName("message")]
+    [Description("Status message of the operation")]
+    [Required]
+    public string Message { get; init; } = string.Empty;
 }

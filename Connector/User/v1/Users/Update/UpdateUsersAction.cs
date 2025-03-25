@@ -1,20 +1,13 @@
 namespace Connector.User.v1.Users.Update;
 
 using Json.Schema.Generation;
-using System;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.Action;
 
 /// <summary>
-/// Action object that will represent an action in the Xchange system. This will contain an input object type,
-/// an output object type, and a Action failure type (this will default to <see cref="StandardActionFailure"/>
-/// but that can be overridden with your own preferred type). These objects will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Action for updating a user's role in a SmartPM project
 /// </summary>
-[Description("UpdateUsersAction Action description goes here")]
+[Description("Update a user's role in a SmartPM project")]
 public class UpdateUsersAction : IStandardAction<UpdateUsersActionInput, UpdateUsersActionOutput>
 {
     public UpdateUsersActionInput ActionInput { get; set; } = new();
@@ -26,11 +19,41 @@ public class UpdateUsersAction : IStandardAction<UpdateUsersActionInput, UpdateU
 
 public class UpdateUsersActionInput
 {
+    [JsonPropertyName("projectId")]
+    [Description("The project to update the user in")]
+    [Required]
+    public string ProjectId { get; init; } = string.Empty;
 
+    [JsonPropertyName("userId")]
+    [Description("The ID of the user to update")]
+    [Required]
+    public string UserId { get; init; } = string.Empty;
+
+    [JsonPropertyName("user")]
+    [Description("Email address of the user")]
+    [Required]
+    public string User { get; init; } = string.Empty;
+
+    [JsonPropertyName("role")]
+    [Description("New role to assign to the user")]
+    [Required]
+    public string Role { get; init; } = string.Empty;
 }
 
 public class UpdateUsersActionOutput
 {
     [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    [Description("Unique identifier for the user")]
+    [Required]
+    public int Id { get; init; }
+
+    [JsonPropertyName("user")]
+    [Description("User email address")]
+    [Required]
+    public string User { get; init; } = string.Empty;
+
+    [JsonPropertyName("role")]
+    [Description("Updated role in the project")]
+    [Required]
+    public string Role { get; init; } = string.Empty;
 }

@@ -1,78 +1,83 @@
 using Connector.Client;
-using System;
-using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Xchange.Connector.SDK.CacheWriter;
-using System.Net.Http;
+using ESR.Hosting.CacheWriter;
 
 namespace Connector.ScheduleQuality.v1.ScheduleQuality;
 
 public class ScheduleQualityDataReader : TypedAsyncDataReaderBase<ScheduleQualityDataObject>
 {
     private readonly ILogger<ScheduleQualityDataReader> _logger;
-    private int _currentPage = 0;
+    private readonly IApiClient _apiClient;
+    private readonly string _projectId;
+    private readonly string _scenarioId;
+    private readonly string? _importLogId;
+    private readonly string? _qualityProfileId;
 
     public ScheduleQualityDataReader(
-        ILogger<ScheduleQualityDataReader> logger)
+        ILogger<ScheduleQualityDataReader> logger,
+        IApiClient apiClient,
+        string projectId,
+        string scenarioId,
+        string? importLogId = null,
+        string? qualityProfileId = null)
     {
         _logger = logger;
+        _apiClient = apiClient;
+        _projectId = projectId;
+        _scenarioId = scenarioId;
+        _importLogId = importLogId;
+        _qualityProfileId = qualityProfileId;
     }
 
-    public override async IAsyncEnumerable<ScheduleQualityDataObject> GetTypedDataAsync(DataObjectCacheWriteArguments ? dataObjectRunArguments, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ScheduleQualityDataObject> GetTypedDataAsync(
+        DataObjectCacheWriteArguments? dataObjectRunArguments,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        while (true)
-        {
-            var response = new ApiResponse<PaginatedResponse<ScheduleQualityDataObject>>();
-            // If the ScheduleQualityDataObject does not have the same structure as the ScheduleQuality response from the API, create a new class for it and replace ScheduleQualityDataObject with it.
-            // Example:
-            // var response = new ApiResponse<IEnumerable<ScheduleQualityResponse>>();
+        ScheduleQualityDataObject? scheduleQuality = null;
 
-            // Make a call to your API/system to retrieve the objects/type for the connector's configuration.
-            try
-            {
-                //response = await _apiClient.GetRecords<ScheduleQualityDataObject>(
-                //    relativeUrl: "scheduleQualitys",
-                //    page: _currentPage,
-                //    cancellationToken: cancellationToken)
-                //    .ConfigureAwait(false);
-            }
-            catch (HttpRequestException exception)
-            {
-                _logger.LogError(exception, "Exception while making a read request to data object 'ScheduleQualityDataObject'");
-                throw;
-            }
+        try
+        {
+            var response = await _apiClient.GetScheduleQualityAsync(
+                _projectId,
+                _scenarioId,
+                _importLogId,
+                _qualityProfileId,
+                cancellationToken)
+                .ConfigureAwait(false);
 
             if (!response.IsSuccessful)
             {
-                throw new Exception($"Failed to retrieve records for 'ScheduleQualityDataObject'. API StatusCode: {response.StatusCode}");
+                throw new Exception($"Failed to retrieve schedule quality. API StatusCode: {response.StatusCode}, Error: {response.ErrorMessage}");
             }
 
-            if (response.Data == null || !response.Data.Items.Any()) break;
-
-            // Return the data objects to Cache.
-            foreach (var item in response.Data.Items)
+            scheduleQuality = response.GetData();
+            if (scheduleQuality == null)
             {
-                // If new class was created to match the API response, create a new ScheduleQualityDataObject object, map the properties and return a ScheduleQualityDataObject.
-
-                // Example:
-                //var resource = new ScheduleQualityDataObject
-                //{
-                //// TODO: Map properties.      
-                //};
-                //yield return resource;
-                yield return item;
+                throw new Exception("Schedule quality response data was null");
             }
 
-            // Handle pagination per API client design
-            _currentPage++;
-            if (_currentPage >= response.Data.TotalPages)
+            // Set the project and scenario IDs from the request
+            scheduleQuality = new ScheduleQualityDataObject
             {
-                break;
-            }
+                ProjectId = _projectId,
+                ScenarioId = _scenarioId,
+                Metrics = scheduleQuality.Metrics,
+                Grade = scheduleQuality.Grade,
+                QualityProfileId = scheduleQuality.QualityProfileId
+            };
         }
+        catch (HttpRequestException exception)
+        {
+            _logger.LogError(exception, "Error retrieving schedule quality for Project {ProjectId}, Scenario {ScenarioId}", _projectId, _scenarioId);
+            throw;
+        }
+
+        yield return scheduleQuality;
     }
 }

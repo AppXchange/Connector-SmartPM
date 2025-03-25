@@ -1,24 +1,37 @@
 namespace Connector.Projects.v1.ProjectWorkBreakdownStructureElement;
 
 using Json.Schema.Generation;
-using System;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.CacheWriter;
 
 /// <summary>
-/// Data object that will represent an object in the Xchange system. This will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Data object representing a specific work breakdown structure element from SmartPM
 /// </summary>
 [PrimaryKey("id", nameof(Id))]
 //[AlternateKey("alt-key-id", nameof(CompanyId), nameof(EquipmentNumber))]
-[Description("Example description of the object.")]
+[Description("SmartPM Project Work Breakdown Structure Element data object representing a specific WBS element.")]
 public class ProjectWorkBreakdownStructureElementDataObject
 {
     [JsonPropertyName("id")]
-    [Description("Example primary key of the object")]
+    [Description("Unique identifier for the WBS element")]
     [Required]
-    public required Guid Id { get; init; }
+    public int Id { get; init; }
+
+    [JsonPropertyName("parentWBSId")]
+    [Description("ID of the parent WBS element, if any")]
+    public int? ParentWBSId { get; init; }
+
+    [JsonPropertyName("sequenceNumber")]
+    [Description("Sequence number for ordering")]
+    public int SequenceNumber { get; init; }
+
+    [JsonPropertyName("code")]
+    [Description("WBS code for the element")]
+    [Required]
+    public string Code { get; init; } = string.Empty;
+
+    [JsonPropertyName("name")]
+    [Description("Name of the WBS element")]
+    [Required]
+    public string Name { get; init; } = string.Empty;
 }

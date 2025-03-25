@@ -1,20 +1,13 @@
 namespace Connector.ExternalReference.v1.ExternalReference.Add;
 
 using Json.Schema.Generation;
-using System;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.Action;
 
 /// <summary>
-/// Action object that will represent an action in the Xchange system. This will contain an input object type,
-/// an output object type, and a Action failure type (this will default to <see cref="StandardActionFailure"/>
-/// but that can be overridden with your own preferred type). These objects will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Action for adding an external reference to a SmartPM project
 /// </summary>
-[Description("AddExternalReferenceAction Action description goes here")]
+[Description("Add an external reference link to a SmartPM project")]
 public class AddExternalReferenceAction : IStandardAction<AddExternalReferenceActionInput, AddExternalReferenceActionOutput>
 {
     public AddExternalReferenceActionInput ActionInput { get; set; } = new();
@@ -26,11 +19,36 @@ public class AddExternalReferenceAction : IStandardAction<AddExternalReferenceAc
 
 public class AddExternalReferenceActionInput
 {
+    [JsonPropertyName("projectId")]
+    [Description("The project to add the external reference to")]
+    [Required]
+    [MinLength(1)]
+    public string ProjectId { get; init; } = string.Empty;
 
+    [JsonPropertyName("provider")]
+    [Description("The external system provider name")]
+    [Required]
+    [MinLength(1)]
+    public string Provider { get; init; } = string.Empty;
+
+    [JsonPropertyName("externalId")]
+    [Description("The ID of the resource in the external system")]
+    [Required]
+    [MinLength(1)]
+    public string ExternalId { get; init; } = string.Empty;
 }
 
 public class AddExternalReferenceActionOutput
 {
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    [JsonPropertyName("provider")]
+    [Description("The external system provider name")]
+    [Required]
+    [MinLength(1)]
+    public string Provider { get; init; } = string.Empty;
+
+    [JsonPropertyName("externalId")]
+    [Description("The ID of the resource in the external system")]
+    [Required]
+    [MinLength(1)]
+    public string ExternalId { get; init; } = string.Empty;
 }

@@ -1,9 +1,8 @@
 using Connector.Client;
-using System;
 using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Xchange.Connector.SDK.CacheWriter;
@@ -14,65 +13,70 @@ namespace Connector.Scenario.v1.ProjectHealthTrend;
 public class ProjectHealthTrendDataReader : TypedAsyncDataReaderBase<ProjectHealthTrendDataObject>
 {
     private readonly ILogger<ProjectHealthTrendDataReader> _logger;
-    private int _currentPage = 0;
+    private readonly IApiClient _apiClient;
+    private readonly string _projectId;
+    private readonly string _scenarioId;
+    private readonly string? _dataDate;
 
     public ProjectHealthTrendDataReader(
-        ILogger<ProjectHealthTrendDataReader> logger)
+        ILogger<ProjectHealthTrendDataReader> logger,
+        IApiClient apiClient,
+        string projectId,
+        string scenarioId,
+        string? dataDate = null)
     {
         _logger = logger;
+        _apiClient = apiClient;
+        _projectId = projectId;
+        _scenarioId = scenarioId;
+        _dataDate = dataDate;
     }
 
-    public override async IAsyncEnumerable<ProjectHealthTrendDataObject> GetTypedDataAsync(DataObjectCacheWriteArguments ? dataObjectRunArguments, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ProjectHealthTrendDataObject> GetTypedDataAsync(
+        DataObjectCacheWriteArguments? dataObjectRunArguments,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        while (true)
-        {
-            var response = new ApiResponse<PaginatedResponse<ProjectHealthTrendDataObject>>();
-            // If the ProjectHealthTrendDataObject does not have the same structure as the ProjectHealthTrend response from the API, create a new class for it and replace ProjectHealthTrendDataObject with it.
-            // Example:
-            // var response = new ApiResponse<IEnumerable<ProjectHealthTrendResponse>>();
+        List<ProjectHealthTrendDataObject>? trendData = null;
 
-            // Make a call to your API/system to retrieve the objects/type for the connector's configuration.
-            try
-            {
-                //response = await _apiClient.GetRecords<ProjectHealthTrendDataObject>(
-                //    relativeUrl: "projectHealthTrends",
-                //    page: _currentPage,
-                //    cancellationToken: cancellationToken)
-                //    .ConfigureAwait(false);
-            }
-            catch (HttpRequestException exception)
-            {
-                _logger.LogError(exception, "Exception while making a read request to data object 'ProjectHealthTrendDataObject'");
-                throw;
-            }
+        try
+        {
+            var response = await _apiClient.GetProjectHealthTrendAsync(
+                _projectId,
+                _scenarioId,
+                _dataDate,
+                cancellationToken)
+                .ConfigureAwait(false);
 
             if (!response.IsSuccessful)
             {
-                throw new Exception($"Failed to retrieve records for 'ProjectHealthTrendDataObject'. API StatusCode: {response.StatusCode}");
+                throw new Exception($"Failed to retrieve project health trend. API StatusCode: {response.StatusCode}, Error: {response.ErrorMessage}");
             }
 
-            if (response.Data == null || !response.Data.Items.Any()) break;
+            trendData = response.GetData();
+        }
+        catch (HttpRequestException exception)
+        {
+            _logger.LogError(exception, "Exception while fetching project health trend for project {ProjectId} and scenario {ScenarioId}",
+                _projectId, _scenarioId);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while fetching project health trend for project {ProjectId} and scenario {ScenarioId}",
+                _projectId, _scenarioId);
+            throw;
+        }
 
-            // Return the data objects to Cache.
-            foreach (var item in response.Data.Items)
-            {
-                // If new class was created to match the API response, create a new ProjectHealthTrendDataObject object, map the properties and return a ProjectHealthTrendDataObject.
+        if (trendData == null || trendData.Count == 0)
+        {
+            _logger.LogInformation("No project health trend data found for project {ProjectId} and scenario {ScenarioId}",
+                _projectId, _scenarioId);
+            yield break;
+        }
 
-                // Example:
-                //var resource = new ProjectHealthTrendDataObject
-                //{
-                //// TODO: Map properties.      
-                //};
-                //yield return resource;
-                yield return item;
-            }
-
-            // Handle pagination per API client design
-            _currentPage++;
-            if (_currentPage >= response.Data.TotalPages)
-            {
-                break;
-            }
+        foreach (var dataPoint in trendData)
+        {
+            yield return dataPoint;
         }
     }
 }

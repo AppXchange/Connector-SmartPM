@@ -1,36 +1,36 @@
 namespace Connector.Projects.v1.Project.Delete;
 
 using Json.Schema.Generation;
-using System;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.Action;
 
 /// <summary>
-/// Action object that will represent an action in the Xchange system. This will contain an input object type,
-/// an output object type, and a Action failure type (this will default to <see cref="StandardActionFailure"/>
-/// but that can be overridden with your own preferred type). These objects will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Action for deleting a project in SmartPM
 /// </summary>
-[Description("DeleteProjectAction Action description goes here")]
+[Description("Delete an existing project in SmartPM")]
 public class DeleteProjectAction : IStandardAction<DeleteProjectActionInput, DeleteProjectActionOutput>
 {
     public DeleteProjectActionInput ActionInput { get; set; } = new();
     public DeleteProjectActionOutput ActionOutput { get; set; } = new();
     public StandardActionFailure ActionFailure { get; set; } = new();
-
     public bool CreateRtap => true;
 }
 
 public class DeleteProjectActionInput
 {
-
+    [JsonPropertyName("projectId")]
+    [Description("The ID of the project to delete")]
+    [Required]
+    public string ProjectId { get; set; } = string.Empty;
 }
 
 public class DeleteProjectActionOutput
 {
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    [JsonPropertyName("success")]
+    [Description("Indicates if the project was successfully deleted")]
+    public bool Success { get; set; }
+
+    [JsonPropertyName("message")]
+    [Description("Response message from the API")]
+    public string Message { get; set; } = string.Empty;
 }

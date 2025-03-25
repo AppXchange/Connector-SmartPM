@@ -1,20 +1,13 @@
 namespace Connector.Company.v1.CompanyConfig.Update;
 
 using Json.Schema.Generation;
-using System;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.Action;
 
 /// <summary>
-/// Action object that will represent an action in the Xchange system. This will contain an input object type,
-/// an output object type, and a Action failure type (this will default to <see cref="StandardActionFailure"/>
-/// but that can be overridden with your own preferred type). These objects will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Action for updating a company configuration setting in SmartPM
 /// </summary>
-[Description("UpdateCompanyConfigAction Action description goes here")]
+[Description("Update a company configuration setting")]
 public class UpdateCompanyConfigAction : IStandardAction<UpdateCompanyConfigActionInput, UpdateCompanyConfigActionOutput>
 {
     public UpdateCompanyConfigActionInput ActionInput { get; set; } = new();
@@ -24,13 +17,38 @@ public class UpdateCompanyConfigAction : IStandardAction<UpdateCompanyConfigActi
     public bool CreateRtap => true;
 }
 
+/// <summary>
+/// Input model for updating a company configuration
+/// </summary>
 public class UpdateCompanyConfigActionInput
 {
+    [JsonPropertyName("configuration")]
+    [Description("The configuration key to update")]
+    [Required]
+    public string Configuration { get; init; } = string.Empty;
 
+    [JsonPropertyName("setting")]
+    [Description("The new value for the configuration")]
+    [Required]
+    public string Setting { get; init; } = string.Empty;
 }
 
+/// <summary>
+/// Output model containing the updated configuration
+/// </summary>
 public class UpdateCompanyConfigActionOutput
 {
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    [JsonPropertyName("configuration")]
+    [Description("The configuration key")]
+    [Required]
+    public string Configuration { get; init; } = string.Empty;
+
+    [JsonPropertyName("setting")]
+    [Description("The value or setting for this configuration")]
+    [Required]
+    public string Setting { get; init; } = string.Empty;
+
+    [JsonPropertyName("permission")]
+    [Description("The permission level required for this configuration, if any")]
+    public string? Permission { get; init; }
 }

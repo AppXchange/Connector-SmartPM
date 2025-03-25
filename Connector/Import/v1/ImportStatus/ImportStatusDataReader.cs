@@ -1,78 +1,69 @@
 using Connector.Client;
-using System;
 using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Xchange.Connector.SDK.CacheWriter;
 using System.Net.Http;
+using Xchange.Connector.SDK.CacheWriter;
 
 namespace Connector.Import.v1.ImportStatus;
 
 public class ImportStatusDataReader : TypedAsyncDataReaderBase<ImportStatusDataObject>
 {
     private readonly ILogger<ImportStatusDataReader> _logger;
-    private int _currentPage = 0;
+    private readonly IApiClient _apiClient;
+    private readonly string _projectId;
+    private readonly string _importId;
 
     public ImportStatusDataReader(
-        ILogger<ImportStatusDataReader> logger)
+        ILogger<ImportStatusDataReader> logger,
+        IApiClient apiClient,
+        string projectId,
+        string importId)
     {
         _logger = logger;
+        _apiClient = apiClient;
+        _projectId = projectId;
+        _importId = importId;
     }
 
-    public override async IAsyncEnumerable<ImportStatusDataObject> GetTypedDataAsync(DataObjectCacheWriteArguments ? dataObjectRunArguments, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ImportStatusDataObject> GetTypedDataAsync(
+        DataObjectCacheWriteArguments? dataObjectRunArguments,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        while (true)
-        {
-            var response = new ApiResponse<PaginatedResponse<ImportStatusDataObject>>();
-            // If the ImportStatusDataObject does not have the same structure as the ImportStatus response from the API, create a new class for it and replace ImportStatusDataObject with it.
-            // Example:
-            // var response = new ApiResponse<IEnumerable<ImportStatusResponse>>();
+        ImportStatusDataObject? importStatus = null;
 
-            // Make a call to your API/system to retrieve the objects/type for the connector's configuration.
-            try
-            {
-                //response = await _apiClient.GetRecords<ImportStatusDataObject>(
-                //    relativeUrl: "importStatus",
-                //    page: _currentPage,
-                //    cancellationToken: cancellationToken)
-                //    .ConfigureAwait(false);
-            }
-            catch (HttpRequestException exception)
-            {
-                _logger.LogError(exception, "Exception while making a read request to data object 'ImportStatusDataObject'");
-                throw;
-            }
+        try
+        {
+            var response = await _apiClient.GetImportStatusAsync(
+                _projectId,
+                _importId,
+                cancellationToken)
+                .ConfigureAwait(false);
 
             if (!response.IsSuccessful)
             {
-                throw new Exception($"Failed to retrieve records for 'ImportStatusDataObject'. API StatusCode: {response.StatusCode}");
+                throw new Exception($"Failed to retrieve import status. API StatusCode: {response.StatusCode}, Error: {response.ErrorMessage}");
             }
 
-            if (response.Data == null || !response.Data.Items.Any()) break;
-
-            // Return the data objects to Cache.
-            foreach (var item in response.Data.Items)
-            {
-                // If new class was created to match the API response, create a new ImportStatusDataObject object, map the properties and return a ImportStatusDataObject.
-
-                // Example:
-                //var resource = new ImportStatusDataObject
-                //{
-                //// TODO: Map properties.      
-                //};
-                //yield return resource;
-                yield return item;
-            }
-
-            // Handle pagination per API client design
-            _currentPage++;
-            if (_currentPage >= response.Data.TotalPages)
-            {
-                break;
-            }
+            importStatus = response.GetData();
         }
+        catch (HttpRequestException exception)
+        {
+            _logger.LogError(exception, "Exception while retrieving import status for project {ProjectId} and import {ImportId}",
+                _projectId, _importId);
+            throw;
+        }
+
+        if (importStatus == null)
+        {
+            _logger.LogInformation("No import status found for project {ProjectId} and import {ImportId}",
+                _projectId, _importId);
+            yield break;
+        }
+
+        yield return importStatus;
     }
 }

@@ -1,78 +1,81 @@
 using Connector.Client;
-using System;
 using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Xchange.Connector.SDK.CacheWriter;
 using System.Net.Http;
+using Xchange.Connector.SDK.CacheWriter;
 
 namespace Connector.Activity.v1.Activities;
 
 public class ActivitiesDataReader : TypedAsyncDataReaderBase<ActivitiesDataObject>
 {
     private readonly ILogger<ActivitiesDataReader> _logger;
-    private int _currentPage = 0;
+    private readonly IApiClient _apiClient;
+    private readonly string _projectId;
+    private readonly string _scenarioId;
+    private readonly string? _dataDate;
+    private readonly string? _filterId;
 
     public ActivitiesDataReader(
-        ILogger<ActivitiesDataReader> logger)
+        ILogger<ActivitiesDataReader> logger,
+        IApiClient apiClient,
+        string projectId,
+        string scenarioId,
+        string? dataDate = null,
+        string? filterId = null)
     {
         _logger = logger;
+        _apiClient = apiClient;
+        _projectId = projectId;
+        _scenarioId = scenarioId;
+        _dataDate = dataDate;
+        _filterId = filterId;
     }
 
-    public override async IAsyncEnumerable<ActivitiesDataObject> GetTypedDataAsync(DataObjectCacheWriteArguments ? dataObjectRunArguments, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ActivitiesDataObject> GetTypedDataAsync(
+        DataObjectCacheWriteArguments? dataObjectRunArguments,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        while (true)
-        {
-            var response = new ApiResponse<PaginatedResponse<ActivitiesDataObject>>();
-            // If the ActivitiesDataObject does not have the same structure as the Activities response from the API, create a new class for it and replace ActivitiesDataObject with it.
-            // Example:
-            // var response = new ApiResponse<IEnumerable<ActivitiesResponse>>();
+        List<ActivitiesDataObject>? activities = null;
 
-            // Make a call to your API/system to retrieve the objects/type for the connector's configuration.
-            try
-            {
-                //response = await _apiClient.GetRecords<ActivitiesDataObject>(
-                //    relativeUrl: "activities",
-                //    page: _currentPage,
-                //    cancellationToken: cancellationToken)
-                //    .ConfigureAwait(false);
-            }
-            catch (HttpRequestException exception)
-            {
-                _logger.LogError(exception, "Exception while making a read request to data object 'ActivitiesDataObject'");
-                throw;
-            }
+        try
+        {
+            var response = await _apiClient.GetActivitiesAsync(
+                _projectId,
+                _scenarioId,
+                _dataDate,
+                _filterId,
+                cancellationToken)
+                .ConfigureAwait(false);
 
             if (!response.IsSuccessful)
             {
-                throw new Exception($"Failed to retrieve records for 'ActivitiesDataObject'. API StatusCode: {response.StatusCode}");
+                throw new Exception($"Failed to retrieve activities. API StatusCode: {response.StatusCode}, Error: {response.ErrorMessage}");
             }
 
-            if (response.Data == null || !response.Data.Items.Any()) break;
+            activities = response.GetData();
+        }
+        catch (HttpRequestException exception)
+        {
+            _logger.LogError(exception, "Exception while retrieving activities for project {ProjectId} and scenario {ScenarioId}",
+                _projectId, _scenarioId);
+            throw;
+        }
 
-            // Return the data objects to Cache.
-            foreach (var item in response.Data.Items)
-            {
-                // If new class was created to match the API response, create a new ActivitiesDataObject object, map the properties and return a ActivitiesDataObject.
+        if (activities == null || !activities.Any())
+        {
+            _logger.LogInformation("No activities found for project {ProjectId} and scenario {ScenarioId}",
+                _projectId, _scenarioId);
+            yield break;
+        }
 
-                // Example:
-                //var resource = new ActivitiesDataObject
-                //{
-                //// TODO: Map properties.      
-                //};
-                //yield return resource;
-                yield return item;
-            }
-
-            // Handle pagination per API client design
-            _currentPage++;
-            if (_currentPage >= response.Data.TotalPages)
-            {
-                break;
-            }
+        foreach (var activity in activities)
+        {
+            yield return activity;
         }
     }
 }

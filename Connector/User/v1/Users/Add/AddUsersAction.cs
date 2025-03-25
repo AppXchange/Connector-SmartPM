@@ -1,24 +1,17 @@
 namespace Connector.User.v1.Users.Add;
 
 using Json.Schema.Generation;
-using System;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.Action;
 
 /// <summary>
-/// Action object that will represent an action in the Xchange system. This will contain an input object type,
-/// an output object type, and a Action failure type (this will default to <see cref="StandardActionFailure"/>
-/// but that can be overridden with your own preferred type). These objects will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Action for adding a user to a SmartPM project
 /// </summary>
-[Description("AddUsersAction Action description goes here")]
-public class AddUsersAction : IStandardAction<AddUsersActionInput, AddUsersActionOutput>
+[Description("Add a user to a SmartPM project with a specified role")]
+public class AddUsersAction : IStandardAction<AddUsersActionInput, UsersDataObject>
 {
     public AddUsersActionInput ActionInput { get; set; } = new();
-    public AddUsersActionOutput ActionOutput { get; set; } = new();
+    public UsersDataObject ActionOutput { get; set; } = new();
     public StandardActionFailure ActionFailure { get; set; } = new();
 
     public bool CreateRtap => true;
@@ -26,11 +19,18 @@ public class AddUsersAction : IStandardAction<AddUsersActionInput, AddUsersActio
 
 public class AddUsersActionInput
 {
+    [JsonPropertyName("projectId")]
+    [Description("The project to add the user to")]
+    [Required]
+    public string ProjectId { get; init; } = string.Empty;
 
-}
+    [JsonPropertyName("user")]
+    [Description("Email address of the user to add")]
+    [Required]
+    public string User { get; init; } = string.Empty;
 
-public class AddUsersActionOutput
-{
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    [JsonPropertyName("role")]
+    [Description("Role to assign to the user")]
+    [Required]
+    public string Role { get; init; } = string.Empty;
 }

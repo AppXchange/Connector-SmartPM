@@ -1,78 +1,75 @@
 using Connector.Client;
-using System;
 using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Xchange.Connector.SDK.CacheWriter;
 using System.Net.Http;
+using Xchange.Connector.SDK.CacheWriter;
 
 namespace Connector.Scenario.v1.SchedulePerformanceIndexTrend;
 
 public class SchedulePerformanceIndexTrendDataReader : TypedAsyncDataReaderBase<SchedulePerformanceIndexTrendDataObject>
 {
     private readonly ILogger<SchedulePerformanceIndexTrendDataReader> _logger;
-    private int _currentPage = 0;
+    private readonly IApiClient _apiClient;
+    private readonly string _projectId;
+    private readonly string _scenarioId;
+    private readonly string? _dataDate;
 
     public SchedulePerformanceIndexTrendDataReader(
-        ILogger<SchedulePerformanceIndexTrendDataReader> logger)
+        ILogger<SchedulePerformanceIndexTrendDataReader> logger,
+        IApiClient apiClient,
+        string projectId,
+        string scenarioId,
+        string? dataDate = null)
     {
         _logger = logger;
+        _apiClient = apiClient;
+        _projectId = projectId;
+        _scenarioId = scenarioId;
+        _dataDate = dataDate;
     }
 
-    public override async IAsyncEnumerable<SchedulePerformanceIndexTrendDataObject> GetTypedDataAsync(DataObjectCacheWriteArguments ? dataObjectRunArguments, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<SchedulePerformanceIndexTrendDataObject> GetTypedDataAsync(
+        DataObjectCacheWriteArguments? dataObjectRunArguments,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        while (true)
-        {
-            var response = new ApiResponse<PaginatedResponse<SchedulePerformanceIndexTrendDataObject>>();
-            // If the SchedulePerformanceIndexTrendDataObject does not have the same structure as the SchedulePerformanceIndexTrend response from the API, create a new class for it and replace SchedulePerformanceIndexTrendDataObject with it.
-            // Example:
-            // var response = new ApiResponse<IEnumerable<SchedulePerformanceIndexTrendResponse>>();
+        List<SchedulePerformanceIndexTrendDataObject>? trendData = null;
 
-            // Make a call to your API/system to retrieve the objects/type for the connector's configuration.
-            try
-            {
-                //response = await _apiClient.GetRecords<SchedulePerformanceIndexTrendDataObject>(
-                //    relativeUrl: "schedulePerformanceIndexTrends",
-                //    page: _currentPage,
-                //    cancellationToken: cancellationToken)
-                //    .ConfigureAwait(false);
-            }
-            catch (HttpRequestException exception)
-            {
-                _logger.LogError(exception, "Exception while making a read request to data object 'SchedulePerformanceIndexTrendDataObject'");
-                throw;
-            }
+        try
+        {
+            var response = await _apiClient.GetSchedulePerformanceIndexTrendAsync(
+                _projectId,
+                _scenarioId,
+                _dataDate,
+                cancellationToken)
+                .ConfigureAwait(false);
 
             if (!response.IsSuccessful)
             {
-                throw new Exception($"Failed to retrieve records for 'SchedulePerformanceIndexTrendDataObject'. API StatusCode: {response.StatusCode}");
+                throw new Exception($"Failed to retrieve schedule performance index trend. API StatusCode: {response.StatusCode}, Error: {response.ErrorMessage}");
             }
 
-            if (response.Data == null || !response.Data.Items.Any()) break;
+            trendData = response.GetData();
+        }
+        catch (HttpRequestException exception)
+        {
+            _logger.LogError(exception, "Exception while retrieving schedule performance index trend data");
+            throw;
+        }
 
-            // Return the data objects to Cache.
-            foreach (var item in response.Data.Items)
-            {
-                // If new class was created to match the API response, create a new SchedulePerformanceIndexTrendDataObject object, map the properties and return a SchedulePerformanceIndexTrendDataObject.
+        if (trendData == null || !trendData.Any())
+        {
+            _logger.LogInformation("No schedule performance index trend data found");
+            yield break;
+        }
 
-                // Example:
-                //var resource = new SchedulePerformanceIndexTrendDataObject
-                //{
-                //// TODO: Map properties.      
-                //};
-                //yield return resource;
-                yield return item;
-            }
-
-            // Handle pagination per API client design
-            _currentPage++;
-            if (_currentPage >= response.Data.TotalPages)
-            {
-                break;
-            }
+        foreach (var dataPoint in trendData)
+        {
+            yield return dataPoint;
         }
     }
 }

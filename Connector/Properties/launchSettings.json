@@ -8,7 +8,8 @@
       "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --dataObjectUrl health-check --actionUrl add",
       "environmentVariables": {
         "DIFFYCACHE_DBLOCATION": "./databases",
-        "ESR__QueueName": "localrun"
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
       }
     },
     "Cache Writer Local Development": {
@@ -16,16 +17,540 @@
       "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType CacheWriter",
       "environmentVariables": {
         "DIFFYCACHE_DBLOCATION": "./databases",
-        "ESR__QueueName": "localrun"
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
       }
     },
     "Test Connection Local Development": {
       "commandName": "Project",
-      "commandLineArgs": "--isLocal true --testingConnection true",
+      "commandLineArgs": "--isLocal true --testingConnection true --moduleId app-1",
       "environmentVariables": {
         "DIFFYCACHE_DBLOCATION": "./databases",
-        "ESR__QueueName": "localrun"
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "GetProjects Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType CacheWriter --action GetProjects",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "GetProject Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType CacheWriter --action GetProject --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "CreateProject Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action CreateProject",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "DeleteProject Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action DeleteProject --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "UpdateProjectMetadata Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action UpdateProjectMetadata --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "GetProjectComments Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType CacheWriter --action GetProjectComments --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "CreateProjectComment Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action CreateProjectComment --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ProjectCalendars Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ProjectCalendars --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ProjectCalendar Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ProjectCalendar --projectId {projectId} --calendarId {calendarId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ProjectWorkBreakdownStructure Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ProjectWorkBreakdownStructure --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ProjectActivityCodeTypes Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ProjectActivityCodeTypes --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "SpecificProjectActivityCodeType Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action SpecificProjectActivityCodeType --projectId {projectId} --activityCodeTypeId {activityCodeTypeId} --activityCodeId {activityCodeId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ProjectWorkBreakdownStructureElement Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ProjectWorkBreakdownStructureElement --projectId {projectId} --wbsId {wbsId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ProjectScenarios Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ProjectScenarios --projectId {projectId} --asOf {asOf}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ScenarioDetails Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ScenarioDetails --projectId {projectId} --scenarioId {scenarioId} --dataDate {dataDate}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "PercentCompleteCurve Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action PercentCompleteCurve --projectId {projectId} --scenarioId {scenarioId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "PercentCompleteCurveV2 Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action PercentCompleteCurveV2 --projectId {projectId} --scenarioId {scenarioId} --delta {delta}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "EarnedScheduleCurve Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action EarnedScheduleCurve --projectId {projectId} --scenarioId {scenarioId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ScheduleCompression Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ScheduleCompression --projectId {projectId} --scenarioId {scenarioId} --dataDate {dataDate}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ProjectHealth Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ProjectHealth --projectId {projectId} --scenarioId {scenarioId} --dataDate {dataDate}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ProjectHealthTrend Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ProjectHealthTrend --projectId {projectId} --scenarioId {scenarioId} --dataDate {dataDate}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ScheduleCompressionTrend Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ScheduleCompressionTrend --projectId {projectId} --scenarioId {scenarioId} --dataDate {dataDate}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "SchedulePerformanceIndex Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action SchedulePerformanceIndex --projectId {projectId} --scenarioId {scenarioId} --dataDate {dataDate}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "SchedulePerformanceIndexTrend Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action SchedulePerformanceIndexTrend --projectId {projectId} --scenarioId {scenarioId} --dataDate {dataDate}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Activities Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action Activities --projectId {projectId} --scenarioId {scenarioId} --dataDate {dataDate} --filterId {filterId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ImportFile Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action ImportFile --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ImportStatus Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ImportStatus --projectId {projectId} --importId {importId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "UploadFile Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action UploadFile",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Users Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action Users --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "AddUsers Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action AddUsers --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "RemoveUsers Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action RemoveUsers --projectId {projectId} --userId {userId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "UpdateUsers Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action UpdateUsers --projectId {projectId} --userId {userId} --user {userEmail} --role {newRole}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "CompanyUsers Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action CompanyUsers",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "CreateCompanyUsers Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action CreateCompanyUsers",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "UpdateCompanyUsers Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action UpdateCompanyUsers",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "DeleteCompanyUsers Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action DeleteCompanyUsers",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ExternalReferences Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ExternalReferences --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "AddExternalReference Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType ActionProcessor --action AddExternalReference",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ScenarioSchedules Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ScenarioSchedules --projectId {projectId} --scenarioId {scenarioId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ScenarioSchedulesv2 Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ScenarioSchedulesv2 --projectId {projectId} --scenarioId {scenarioId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "CompanyConfig Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action CompanyConfig",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "UpdateCompanyConfig Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action UpdateCompanyConfig",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ScheduleQuality Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ScheduleQuality --projectId {projectId} --scenarioId {scenarioId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ScheduleQualityMetricDetails Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ScheduleQualityMetricDetails",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "AllQualityProfiles Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action AllQualityProfiles",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "QualityProfile Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action QualityProfile --qualityProfileId {qualityProfileId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ChangeLogSummary Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ChangeLogSummary --projectId {projectId} --scenarioId {scenarioId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ChangeLogDetails Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ChangeLogDetails --projectId {projectId} --scenarioId {scenarioId} --type {type} --dataDate {dataDate}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "AllChangeLogDetails Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action AllChangeLogDetails --projectId {projectId} --scenarioId {scenarioId} --dataDate {dataDate}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "DelayTable Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action DelayTable --projectId {projectId} --scenarioId {scenarioId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ShouldStartFinishReport Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ShouldStartFinishReport --projectId {projectId} --scenarioId {scenarioId} --startDate {startDate} --finishDate {finishDate}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ShouldStartFinishTrend Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action ShouldStartFinishTrend --projectId {projectId} --scenarioId {scenarioId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "MonthlyDistribution Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action MonthlyDistribution --projectId {projectId} --scenarioId {scenarioId} --dataDate {dataDate}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "CompanyHealthTrend Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action CompanyHealthTrend --periodType {periodType} --filters {filters} --qualityProfileId {qualityProfileId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "CompanyQualityTrend Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action CompanyQualityTrend --periodType {periodType} --filters {filters} --qualityProfileId {qualityProfileId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "CompanyCompressionTrend Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action CompanyCompressionTrend --periodType {periodType} --filters {filters} --qualityProfileId {qualityProfileId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "CompanyMetricTrend Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action CompanyMetricTrend --metricType {metricType} --periodType {periodType} --filters {filters} --qualityProfileId {qualityProfileId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Models Local Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--isLocal true --moduleId app-1 --serviceType DataReader --action Models --projectId {projectId}",
+      "environmentVariables": {
+        "DIFFYCACHE_DBLOCATION": "./databases",
+        "ESR__QueueName": "localrun",
+        "DOTNET_ENVIRONMENT": "Development"
       }
     }
-  }
+  },
 }

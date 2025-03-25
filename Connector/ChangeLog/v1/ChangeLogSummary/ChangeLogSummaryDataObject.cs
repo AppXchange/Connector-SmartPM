@@ -6,19 +6,82 @@ using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.CacheWriter;
 
 /// <summary>
-/// Data object that will represent an object in the Xchange system. This will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Data object representing change log summary information for a project scenario
 /// </summary>
-[PrimaryKey("id", nameof(Id))]
-//[AlternateKey("alt-key-id", nameof(CompanyId), nameof(EquipmentNumber))]
-[Description("Example description of the object.")]
+[PrimaryKey("projectId,scenarioId,dataDate", nameof(ProjectId), nameof(ScenarioId), nameof(DataDate))]
+[Description("SmartPM Change Log Summary data object representing changes that have happened to a scenario over time.")]
 public class ChangeLogSummaryDataObject
 {
-    [JsonPropertyName("id")]
-    [Description("Example primary key of the object")]
+    [JsonPropertyName("projectId")]
+    [Description("The Project ID containing the scenario")]
     [Required]
-    public required Guid Id { get; init; }
+    public string ProjectId { get; init; } = string.Empty;
+
+    [JsonPropertyName("scenarioId")]
+    [Description("The Scenario ID for the change log")]
+    [Required]
+    public string ScenarioId { get; init; } = string.Empty;
+
+    [JsonPropertyName("dataDate")]
+    [Description("The date for which changes are summarized")]
+    [Required]
+    public string DataDate { get; init; } = string.Empty;
+
+    [JsonPropertyName("metrics")]
+    [Description("Metrics summarizing different types of changes")]
+    [Required]
+    public ChangeLogMetrics Metrics { get; init; } = new();
+}
+
+public class ChangeLogMetrics
+{
+    [JsonPropertyName("CriticalChanges")]
+    [Description("The number of changes for an activity on the critical path for a specific period")]
+    [Required]
+    public int CriticalChanges { get; init; }
+
+    [JsonPropertyName("LogicChanges")]
+    [Description("The number of changes that happened to logic ties for a specific period")]
+    [Required]
+    public int LogicChanges { get; init; }
+
+    [JsonPropertyName("DelayedActivityChanges")]
+    [Description("The number of changes that happened to activities with delays for a specific period")]
+    [Required]
+    public int DelayedActivityChanges { get; init; }
+
+    [JsonPropertyName("DurationChanges")]
+    [Description("The number of activities where the duration changed for a specific period")]
+    [Required]
+    public int DurationChanges { get; init; }
+
+    [JsonPropertyName("FlaggedChanges")]
+    [Description("The number of changes that have been flagged for a specific period")]
+    [Required]
+    public int FlaggedChanges { get; init; }
+
+    [JsonPropertyName("AllCalendarChanges")]
+    [Description("The number of calendar / worktime changes that happened for a specific period")]
+    [Required]
+    public int AllCalendarChanges { get; init; }
+
+    [JsonPropertyName("ActivityChanges")]
+    [Description("The number of changes to activities for a specific period")]
+    [Required]
+    public int ActivityChanges { get; init; }
+
+    [JsonPropertyName("CalendarChanges")]
+    [Description("The number of changes to calendars for a specific period")]
+    [Required]
+    public int CalendarChanges { get; init; }
+
+    [JsonPropertyName("WorkingDayChanges")]
+    [Description("The number of worktime changes for a specific period")]
+    [Required]
+    public int WorkingDayChanges { get; init; }
+
+    [JsonPropertyName("NearCriticalChanges")]
+    [Description("The number of near critical (< 10 days of float) for a specific period")]
+    [Required]
+    public int NearCriticalChanges { get; init; }
 }

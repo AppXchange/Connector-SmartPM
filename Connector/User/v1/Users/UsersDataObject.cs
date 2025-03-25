@@ -1,24 +1,29 @@
 namespace Connector.User.v1.Users;
 
 using Json.Schema.Generation;
-using System;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.CacheWriter;
 
 /// <summary>
-/// Data object that will represent an object in the Xchange system. This will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Data object representing user information from SmartPM
 /// </summary>
 [PrimaryKey("id", nameof(Id))]
 //[AlternateKey("alt-key-id", nameof(CompanyId), nameof(EquipmentNumber))]
-[Description("Example description of the object.")]
+[Description("SmartPM User data object representing user details and roles for a project.")]
 public class UsersDataObject
 {
     [JsonPropertyName("id")]
-    [Description("Example primary key of the object")]
+    [Description("Unique identifier for the user")]
     [Required]
-    public required Guid Id { get; init; }
+    public int Id { get; init; }
+
+    [JsonPropertyName("user")]
+    [Description("User email address")]
+    [Required]
+    public string User { get; init; } = string.Empty;
+
+    [JsonPropertyName("role")]
+    [Description("User's role in the project")]
+    [Required]
+    public string Role { get; init; } = string.Empty;
 }

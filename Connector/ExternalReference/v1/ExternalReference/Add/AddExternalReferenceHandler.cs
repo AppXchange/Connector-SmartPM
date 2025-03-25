@@ -16,68 +16,84 @@ namespace Connector.ExternalReference.v1.ExternalReference.Add;
 public class AddExternalReferenceHandler : IActionHandler<AddExternalReferenceAction>
 {
     private readonly ILogger<AddExternalReferenceHandler> _logger;
+    private readonly IApiClient _apiClient;
 
     public AddExternalReferenceHandler(
-        ILogger<AddExternalReferenceHandler> logger)
+        ILogger<AddExternalReferenceHandler> logger,
+        IApiClient apiClient)
     {
         _logger = logger;
+        _apiClient = apiClient;
     }
     
     public async Task<ActionHandlerOutcome> HandleQueuedActionAsync(ActionInstance actionInstance, CancellationToken cancellationToken)
     {
-        var input = JsonSerializer.Deserialize<AddExternalReferenceActionInput>(actionInstance.InputJson);
+        AddExternalReferenceActionInput? input = null;
         try
         {
-            // Given the input for the action, make a call to your API/system
-            var response = new ApiResponse<AddExternalReferenceActionOutput>();
-            // response = await _apiClient.PostExternalReferenceDataObject(input, cancellationToken)
-            // .ConfigureAwait(false);
+            input = JsonSerializer.Deserialize<AddExternalReferenceActionInput>(actionInstance.InputJson);
+            if (input == null)
+            {
+                throw new JsonException("Failed to deserialize input");
+            }
 
-            // The full record is needed for SyncOperations. If the endpoint used for the action returns a partial record (such as only returning the ID) then you can either:
-            // - Make a GET call using the ID that was returned
-            // - Add the ID property to your action input (Assuming this results in the proper data object shape)
+            var response = await _apiClient.AddExternalReferenceAsync(
+                input.ProjectId,
+                input.Provider,
+                input.ExternalId,
+                cancellationToken).ConfigureAwait(false);
 
-            // var resource = await _apiClient.GetExternalReferenceDataObject(response.Data.id, cancellationToken);
+            if (!response.IsSuccessful)
+            {
+                throw new HttpRequestException($"Failed to add external reference. Status: {response.StatusCode}, Error: {response.ErrorMessage}");
+            }
 
-            // var resource = new AddExternalReferenceActionOutput
-            // {
-            //      TODO : map
-            // };
+            var data = response.GetData();
+            if (data == null || data.Count == 0)
+            {
+                throw new HttpRequestException("No data returned from successful external reference creation");
+            }
 
-            // If the response is already the output object for the action, you can use the response directly
-
-            // Build sync operations to update the local cache as well as the Xchange cache system (if the data type is cached)
-            // For more information on SyncOperations and the KeyResolver, check: https://trimble-xchange.github.io/connector-docs/guides/creating-actions/#keyresolver-and-the-sync-cache-operations
             var operations = new List<SyncOperation>();
             var keyResolver = new DefaultDataObjectKey();
-            var key = keyResolver.BuildKeyResolver()(response.Data);
-            operations.Add(SyncOperation.CreateSyncOperation(UpdateOperation.Upsert.ToString(), key.UrlPart, key.PropertyNames, response.Data));
+            var key = keyResolver.BuildKeyResolver()(data[0]);
+            operations.Add(SyncOperation.CreateSyncOperation(UpdateOperation.Upsert.ToString(), key.UrlPart, key.PropertyNames, data[0]));
 
             var resultList = new List<CacheSyncCollection>
             {
-                new CacheSyncCollection() { DataObjectType = typeof(ExternalReferenceDataObject), CacheChanges = operations.ToArray() }
+                new() { DataObjectType = typeof(ExternalReferenceDataObject), CacheChanges = operations.ToArray() }
             };
 
-            return ActionHandlerOutcome.Successful(response.Data, resultList);
+            return ActionHandlerOutcome.Successful(data[0], resultList);
         }
-        catch (HttpRequestException exception)
+        catch (JsonException ex)
         {
-            // If an error occurs, we want to create a failure result for the action that matches
-            // the failure type for the action. 
-            // Common to create extension methods to map to Standard Action Failure
-
-            var errorSource = new List<string> { "AddExternalReferenceHandler" };
-            if (string.IsNullOrEmpty(exception.Source)) errorSource.Add(exception.Source!);
-            
+            _logger.LogError(ex, "Failed to deserialize input for project {ProjectId}", input?.ProjectId ?? "unknown");
             return ActionHandlerOutcome.Failed(new StandardActionFailure
             {
-                Code = exception.StatusCode?.ToString() ?? "500",
-                Errors = new []
+                Code = "400",
+                Errors = new[]
                 {
                     new Xchange.Connector.SDK.Action.Error
                     {
-                        Source = errorSource.ToArray(),
-                        Text = exception.Message
+                        Source = new[] { "AddExternalReferenceHandler" },
+                        Text = "Invalid input format: " + ex.Message
+                    }
+                }
+            });
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Failed to add external reference for project {ProjectId}", input?.ProjectId ?? "unknown");
+            return ActionHandlerOutcome.Failed(new StandardActionFailure
+            {
+                Code = ex.StatusCode?.ToString() ?? "500",
+                Errors = new[]
+                {
+                    new Xchange.Connector.SDK.Action.Error
+                    {
+                        Source = new[] { "AddExternalReferenceHandler" },
+                        Text = ex.Message
                     }
                 }
             });

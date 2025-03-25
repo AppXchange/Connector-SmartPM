@@ -1,77 +1,83 @@
 using Connector.Client;
-using System;
 using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Xchange.Connector.SDK.CacheWriter;
-using System.Net.Http;
 
 namespace Connector.ChangeLog.v1.AllChangeLogDetails;
 
 public class AllChangeLogDetailsDataReader : TypedAsyncDataReaderBase<AllChangeLogDetailsDataObject>
 {
     private readonly ILogger<AllChangeLogDetailsDataReader> _logger;
-    private int _currentPage = 0;
+    private readonly IApiClient _apiClient;
+    private readonly string _projectId;
+    private readonly string _scenarioId;
+    private readonly string? _dataDate;
 
     public AllChangeLogDetailsDataReader(
-        ILogger<AllChangeLogDetailsDataReader> logger)
+        ILogger<AllChangeLogDetailsDataReader> logger,
+        IApiClient apiClient,
+        string projectId,
+        string scenarioId,
+        string? dataDate = null)
     {
         _logger = logger;
+        _apiClient = apiClient;
+        _projectId = projectId;
+        _scenarioId = scenarioId;
+        _dataDate = dataDate;
     }
 
-    public override async IAsyncEnumerable<AllChangeLogDetailsDataObject> GetTypedDataAsync(DataObjectCacheWriteArguments ? dataObjectRunArguments, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<AllChangeLogDetailsDataObject> GetTypedDataAsync(
+        DataObjectCacheWriteArguments? dataObjectRunArguments,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        while (true)
-        {
-            var response = new ApiResponse<PaginatedResponse<AllChangeLogDetailsDataObject>>();
-            // If the AllChangeLogDetailsDataObject does not have the same structure as the AllChangeLogDetails response from the API, create a new class for it and replace AllChangeLogDetailsDataObject with it.
-            // Example:
-            // var response = new ApiResponse<IEnumerable<AllChangeLogDetailsResponse>>();
+        List<AllChangeLogDetailsDataObject>? changeLogDetails = null;
 
-            // Make a call to your API/system to retrieve the objects/type for the connector's configuration.
-            try
-            {
-                //response = await _apiClient.GetRecords<AllChangeLogDetailsDataObject>(
-                //    relativeUrl: "allChangeLogDetails",
-                //    page: _currentPage,
-                //    cancellationToken: cancellationToken)
-                //    .ConfigureAwait(false);
-            }
-            catch (HttpRequestException exception)
-            {
-                _logger.LogError(exception, "Exception while making a read request to data object 'AllChangeLogDetailsDataObject'");
-                throw;
-            }
+        try
+        {
+            var response = await _apiClient.GetAllChangeLogDetailsAsync(
+                _projectId,
+                _scenarioId,
+                _dataDate,
+                cancellationToken)
+                .ConfigureAwait(false);
 
             if (!response.IsSuccessful)
             {
-                throw new Exception($"Failed to retrieve records for 'AllChangeLogDetailsDataObject'. API StatusCode: {response.StatusCode}");
+                throw new Exception($"Failed to retrieve change log details. API StatusCode: {response.StatusCode}, Error: {response.ErrorMessage}");
             }
 
-            if (response.Data == null || !response.Data.Items.Any()) break;
+            changeLogDetails = response.GetData();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving all change log details for Project {ProjectId}, Scenario {ScenarioId}",
+                _projectId, _scenarioId);
+            throw;
+        }
 
-            // Return the data objects to Cache.
-            foreach (var item in response.Data.Items)
+        if (changeLogDetails != null)
+        {
+            foreach (var detail in changeLogDetails)
             {
-                // If new class was created to match the API response, create a new AllChangeLogDetailsDataObject object, map the properties and return a AllChangeLogDetailsDataObject.
-
-                // Example:
-                //var resource = new AllChangeLogDetailsDataObject
-                //{
-                //// TODO: Map properties.      
-                //};
-                //yield return resource;
-                yield return item;
-            }
-
-            // Handle pagination per API client design
-            _currentPage++;
-            if (_currentPage >= response.Data.TotalPages)
-            {
-                break;
+                // Ensure the key fields are set
+                var enrichedDetail = new AllChangeLogDetailsDataObject
+                {
+                    ProjectId = _projectId,
+                    ScenarioId = _scenarioId,
+                    Differences = detail.Differences,
+                    Action = detail.Action,
+                    Entity = detail.Entity,
+                    FriendlyId = detail.FriendlyId,
+                    AuditDate = detail.AuditDate,
+                    FloatTotal = detail.FloatTotal,
+                    ActivityIds = detail.ActivityIds
+                };
+                yield return enrichedDetail;
             }
         }
     }

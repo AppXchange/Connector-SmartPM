@@ -6,19 +6,21 @@ using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.CacheWriter;
 
 /// <summary>
-/// Data object that will represent an object in the Xchange system. This will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Data object representing external reference information from SmartPM
 /// </summary>
-[PrimaryKey("id", nameof(Id))]
-//[AlternateKey("alt-key-id", nameof(CompanyId), nameof(EquipmentNumber))]
-[Description("Example description of the object.")]
+[PrimaryKey("provider,externalId", nameof(Provider), nameof(ExternalId))]
+[Description("SmartPM External Reference data object representing external system links for a project.")]
 public class ExternalReferenceDataObject
 {
-    [JsonPropertyName("id")]
-    [Description("Example primary key of the object")]
+    [JsonPropertyName("provider")]
+    [Description("The external system provider name")]
     [Required]
-    public required Guid Id { get; init; }
+    [MinLength(1)]
+    public string Provider { get; init; } = string.Empty;
+
+    [JsonPropertyName("externalId")]
+    [Description("The ID of the resource in the external system")]
+    [Required]
+    [MinLength(1)]
+    public string ExternalId { get; init; } = string.Empty;
 }

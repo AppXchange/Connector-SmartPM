@@ -1,77 +1,76 @@
 using Connector.Client;
-using System;
 using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Xchange.Connector.SDK.CacheWriter;
-using System.Net.Http;
+using System.Text.Json.Serialization;
 
 namespace Connector.CompanyMetrics.v1.CompanyHealthTrend;
+
+public class CompanyHealthTrendResponse
+{
+    [JsonPropertyName("companyHealthTrends")]
+    public List<CompanyHealthTrendDataObject> CompanyHealthTrends { get; set; } = new();
+}
 
 public class CompanyHealthTrendDataReader : TypedAsyncDataReaderBase<CompanyHealthTrendDataObject>
 {
     private readonly ILogger<CompanyHealthTrendDataReader> _logger;
-    private int _currentPage = 0;
+    private readonly IApiClient _apiClient;
+    private readonly string? _periodType;
+    private readonly string? _filters;
+    private readonly string? _qualityProfileId;
 
     public CompanyHealthTrendDataReader(
-        ILogger<CompanyHealthTrendDataReader> logger)
+        ILogger<CompanyHealthTrendDataReader> logger,
+        IApiClient apiClient,
+        string? periodType = null,
+        string? filters = null,
+        string? qualityProfileId = null)
     {
         _logger = logger;
+        _apiClient = apiClient;
+        _periodType = periodType;
+        _filters = filters;
+        _qualityProfileId = qualityProfileId;
     }
 
-    public override async IAsyncEnumerable<CompanyHealthTrendDataObject> GetTypedDataAsync(DataObjectCacheWriteArguments ? dataObjectRunArguments, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<CompanyHealthTrendDataObject> GetTypedDataAsync(
+        DataObjectCacheWriteArguments? dataObjectRunArguments,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        while (true)
+        CompanyHealthTrendResponse? response = null;
+
+        try
         {
-            var response = new ApiResponse<PaginatedResponse<CompanyHealthTrendDataObject>>();
-            // If the CompanyHealthTrendDataObject does not have the same structure as the CompanyHealthTrend response from the API, create a new class for it and replace CompanyHealthTrendDataObject with it.
-            // Example:
-            // var response = new ApiResponse<IEnumerable<CompanyHealthTrendResponse>>();
+            var apiResponse = await _apiClient.GetCompanyHealthTrendAsync(
+                _periodType,
+                _filters,
+                _qualityProfileId,
+                cancellationToken)
+                .ConfigureAwait(false);
 
-            // Make a call to your API/system to retrieve the objects/type for the connector's configuration.
-            try
+            if (!apiResponse.IsSuccessful)
             {
-                //response = await _apiClient.GetRecords<CompanyHealthTrendDataObject>(
-                //    relativeUrl: "companyHealthTrends",
-                //    page: _currentPage,
-                //    cancellationToken: cancellationToken)
-                //    .ConfigureAwait(false);
-            }
-            catch (HttpRequestException exception)
-            {
-                _logger.LogError(exception, "Exception while making a read request to data object 'CompanyHealthTrendDataObject'");
-                throw;
+                throw new Exception($"Failed to retrieve company health trend data. API StatusCode: {apiResponse.StatusCode}, Error: {apiResponse.ErrorMessage}");
             }
 
-            if (!response.IsSuccessful)
+            response = apiResponse.GetData();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving company health trend data");
+            throw;
+        }
+
+        if (response?.CompanyHealthTrends != null)
+        {
+            foreach (var trend in response.CompanyHealthTrends)
             {
-                throw new Exception($"Failed to retrieve records for 'CompanyHealthTrendDataObject'. API StatusCode: {response.StatusCode}");
-            }
-
-            if (response.Data == null || !response.Data.Items.Any()) break;
-
-            // Return the data objects to Cache.
-            foreach (var item in response.Data.Items)
-            {
-                // If new class was created to match the API response, create a new CompanyHealthTrendDataObject object, map the properties and return a CompanyHealthTrendDataObject.
-
-                // Example:
-                //var resource = new CompanyHealthTrendDataObject
-                //{
-                //// TODO: Map properties.      
-                //};
-                //yield return resource;
-                yield return item;
-            }
-
-            // Handle pagination per API client design
-            _currentPage++;
-            if (_currentPage >= response.Data.TotalPages)
-            {
-                break;
+                yield return trend;
             }
         }
     }

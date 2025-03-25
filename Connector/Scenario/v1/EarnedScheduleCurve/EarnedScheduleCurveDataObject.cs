@@ -1,7 +1,7 @@
 namespace Connector.Scenario.v1.EarnedScheduleCurve;
 
 using Json.Schema.Generation;
-using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.CacheWriter;
 
@@ -18,7 +18,23 @@ using Xchange.Connector.SDK.CacheWriter;
 public class EarnedScheduleCurveDataObject
 {
     [JsonPropertyName("id")]
-    [Description("Example primary key of the object")]
+    [Description("Unique identifier for the curve data")]
     [Required]
-    public required Guid Id { get; init; }
+    public string Id { get; init; } = string.Empty;
+
+    [JsonPropertyName("data")]
+    [Description("List of earned schedule data points")]
+    [Required]
+    public List<EarnedScheduleDataPoint> Data { get; init; } = new();
+}
+
+public class EarnedScheduleDataPoint
+{
+    [JsonPropertyName("date")]
+    [Description("Date of the measurement")]
+    public string Date { get; init; } = string.Empty;
+
+    [JsonPropertyName("earnedDays")]
+    [Description("Number of days earned")]
+    public double EarnedDays { get; init; }
 }

@@ -2,6 +2,7 @@ using Connector.Client;
 using ESR.Hosting.Action;
 using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
@@ -16,68 +17,117 @@ namespace Connector.Projects.v1.Project.UpdateMetadata;
 public class UpdateMetadataProjectHandler : IActionHandler<UpdateMetadataProjectAction>
 {
     private readonly ILogger<UpdateMetadataProjectHandler> _logger;
+    private readonly IApiClient _apiClient;
 
     public UpdateMetadataProjectHandler(
-        ILogger<UpdateMetadataProjectHandler> logger)
+        ILogger<UpdateMetadataProjectHandler> logger,
+        IApiClient apiClient)
     {
         _logger = logger;
+        _apiClient = apiClient;
     }
     
     public async Task<ActionHandlerOutcome> HandleQueuedActionAsync(ActionInstance actionInstance, CancellationToken cancellationToken)
     {
         var input = JsonSerializer.Deserialize<UpdateMetadataProjectActionInput>(actionInstance.InputJson);
+        if (input == null)
+        {
+            return ActionHandlerOutcome.Failed(new StandardActionFailure
+            {
+                Code = "400",
+                Errors = new[]
+                {
+                    new Xchange.Connector.SDK.Action.Error
+                    {
+                        Source = new[] { "UpdateMetadataProjectHandler" },
+                        Text = "Invalid input data"
+                    }
+                }
+            });
+        }
+
         try
         {
-            // Given the input for the action, make a call to your API/system
-            var response = new ApiResponse<UpdateMetadataProjectActionOutput>();
-            // response = await _apiClient.PostProjectDataObject(input, cancellationToken)
-            // .ConfigureAwait(false);
+            var response = await _apiClient.UpdateProjectMetadataAsync(input.ProjectId, input.Metadata, cancellationToken)
+                .ConfigureAwait(false);
 
-            // The full record is needed for SyncOperations. If the endpoint used for the action returns a partial record (such as only returning the ID) then you can either:
-            // - Make a GET call using the ID that was returned
-            // - Add the ID property to your action input (Assuming this results in the proper data object shape)
+            if (!response.IsSuccessful)
+            {
+                return ActionHandlerOutcome.Failed(new StandardActionFailure
+                {
+                    Code = ((int)response.StatusCode).ToString(),
+                    Errors = new[]
+                    {
+                        new Xchange.Connector.SDK.Action.Error
+                        {
+                            Source = new[] { "UpdateMetadataProjectHandler" },
+                            Text = response.ErrorMessage ?? "Failed to update project metadata"
+                        }
+                    }
+                });
+            }
 
-            // var resource = await _apiClient.GetProjectDataObject(response.Data.id, cancellationToken);
+            var output = new UpdateMetadataProjectActionOutput
+            {
+                Metadata = response.GetData()
+            };
 
-            // var resource = new UpdateMetadataProjectActionOutput
-            // {
-            //      TODO : map
-            // };
+            // Get the full project details for sync
+            var projectResponse = await _apiClient.GetProjectByIdAsync(input.ProjectId, cancellationToken)
+                .ConfigureAwait(false);
 
-            // If the response is already the output object for the action, you can use the response directly
+            if (!projectResponse.IsSuccessful || projectResponse.GetData() == null)
+            {
+                _logger.LogWarning("Project metadata was updated but failed to fetch full project details. ProjectId: {ProjectId}", input.ProjectId);
+                return ActionHandlerOutcome.Successful(output);
+            }
 
-            // Build sync operations to update the local cache as well as the Xchange cache system (if the data type is cached)
-            // For more information on SyncOperations and the KeyResolver, check: https://trimble-xchange.github.io/connector-docs/guides/creating-actions/#keyresolver-and-the-sync-cache-operations
+            var project = projectResponse.GetData();
             var operations = new List<SyncOperation>();
             var keyResolver = new DefaultDataObjectKey();
-            var key = keyResolver.BuildKeyResolver()(response.Data);
-            operations.Add(SyncOperation.CreateSyncOperation(UpdateOperation.Upsert.ToString(), key.UrlPart, key.PropertyNames, response.Data));
+            var key = keyResolver.BuildKeyResolver()(project);
+            operations.Add(SyncOperation.CreateSyncOperation(UpdateOperation.Upsert.ToString(), key.UrlPart, key.PropertyNames, project));
 
             var resultList = new List<CacheSyncCollection>
             {
-                new CacheSyncCollection() { DataObjectType = typeof(ProjectDataObject), CacheChanges = operations.ToArray() }
+                new() { DataObjectType = typeof(ProjectDataObject), CacheChanges = operations.ToArray() }
             };
 
-            return ActionHandlerOutcome.Successful(response.Data, resultList);
+            return ActionHandlerOutcome.Successful(output, resultList);
         }
         catch (HttpRequestException exception)
         {
-            // If an error occurs, we want to create a failure result for the action that matches
-            // the failure type for the action. 
-            // Common to create extension methods to map to Standard Action Failure
-
             var errorSource = new List<string> { "UpdateMetadataProjectHandler" };
-            if (string.IsNullOrEmpty(exception.Source)) errorSource.Add(exception.Source!);
+            if (!string.IsNullOrEmpty(exception.Source))
+            {
+                errorSource.Add(exception.Source);
+            }
             
             return ActionHandlerOutcome.Failed(new StandardActionFailure
             {
                 Code = exception.StatusCode?.ToString() ?? "500",
-                Errors = new []
+                Errors = new[]
                 {
                     new Xchange.Connector.SDK.Action.Error
                     {
                         Source = errorSource.ToArray(),
                         Text = exception.Message
+                    }
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while updating project metadata");
+            return ActionHandlerOutcome.Failed(new StandardActionFailure
+            {
+                Code = "500",
+                Errors = new[]
+                {
+                    new Xchange.Connector.SDK.Action.Error
+                    {
+                        Source = new[] { "UpdateMetadataProjectHandler" },
+                        Text = "An unexpected error occurred"
                     }
                 }
             });

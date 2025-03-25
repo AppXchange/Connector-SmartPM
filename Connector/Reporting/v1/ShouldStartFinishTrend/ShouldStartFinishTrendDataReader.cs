@@ -1,77 +1,91 @@
 using Connector.Client;
-using System;
 using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Xchange.Connector.SDK.CacheWriter;
 using System.Net.Http;
+using System.Text.Json.Serialization;
 
 namespace Connector.Reporting.v1.ShouldStartFinishTrend;
+
+public class HitRatesResponse
+{
+    [JsonPropertyName("hitRates")]
+    public List<ShouldStartFinishTrendDataObject> HitRates { get; set; } = new();
+}
 
 public class ShouldStartFinishTrendDataReader : TypedAsyncDataReaderBase<ShouldStartFinishTrendDataObject>
 {
     private readonly ILogger<ShouldStartFinishTrendDataReader> _logger;
-    private int _currentPage = 0;
+    private readonly IApiClient _apiClient;
+    private readonly string _projectId;
+    private readonly string _scenarioId;
 
     public ShouldStartFinishTrendDataReader(
-        ILogger<ShouldStartFinishTrendDataReader> logger)
+        ILogger<ShouldStartFinishTrendDataReader> logger,
+        IApiClient apiClient,
+        string projectId,
+        string scenarioId)
     {
         _logger = logger;
+        _apiClient = apiClient;
+        _projectId = projectId;
+        _scenarioId = scenarioId;
     }
 
-    public override async IAsyncEnumerable<ShouldStartFinishTrendDataObject> GetTypedDataAsync(DataObjectCacheWriteArguments ? dataObjectRunArguments, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ShouldStartFinishTrendDataObject> GetTypedDataAsync(
+        DataObjectCacheWriteArguments? dataObjectRunArguments,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        while (true)
+        HitRatesResponse? response = null;
+
+        try
         {
-            var response = new ApiResponse<PaginatedResponse<ShouldStartFinishTrendDataObject>>();
-            // If the ShouldStartFinishTrendDataObject does not have the same structure as the ShouldStartFinishTrend response from the API, create a new class for it and replace ShouldStartFinishTrendDataObject with it.
-            // Example:
-            // var response = new ApiResponse<IEnumerable<ShouldStartFinishTrendResponse>>();
+            var apiResponse = await _apiClient.GetShouldStartFinishTrendAsync(
+                _projectId,
+                _scenarioId,
+                cancellationToken)
+                .ConfigureAwait(false);
 
-            // Make a call to your API/system to retrieve the objects/type for the connector's configuration.
-            try
+            if (!apiResponse.IsSuccessful)
             {
-                //response = await _apiClient.GetRecords<ShouldStartFinishTrendDataObject>(
-                //    relativeUrl: "shouldStartFinishTrends",
-                //    page: _currentPage,
-                //    cancellationToken: cancellationToken)
-                //    .ConfigureAwait(false);
-            }
-            catch (HttpRequestException exception)
-            {
-                _logger.LogError(exception, "Exception while making a read request to data object 'ShouldStartFinishTrendDataObject'");
-                throw;
+                throw new Exception($"Failed to retrieve should start/finish trend data. API StatusCode: {apiResponse.StatusCode}, Error: {apiResponse.ErrorMessage}");
             }
 
-            if (!response.IsSuccessful)
+            response = apiResponse.GetData();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving should start/finish trend data for Project {ProjectId}, Scenario {ScenarioId}",
+                _projectId, _scenarioId);
+            throw;
+        }
+
+        if (response?.HitRates != null)
+        {
+            foreach (var hitRate in response.HitRates)
             {
-                throw new Exception($"Failed to retrieve records for 'ShouldStartFinishTrendDataObject'. API StatusCode: {response.StatusCode}");
-            }
-
-            if (response.Data == null || !response.Data.Items.Any()) break;
-
-            // Return the data objects to Cache.
-            foreach (var item in response.Data.Items)
-            {
-                // If new class was created to match the API response, create a new ShouldStartFinishTrendDataObject object, map the properties and return a ShouldStartFinishTrendDataObject.
-
-                // Example:
-                //var resource = new ShouldStartFinishTrendDataObject
-                //{
-                //// TODO: Map properties.      
-                //};
-                //yield return resource;
-                yield return item;
-            }
-
-            // Handle pagination per API client design
-            _currentPage++;
-            if (_currentPage >= response.Data.TotalPages)
-            {
-                break;
+                // Ensure the key fields are set
+                var enrichedHitRate = new ShouldStartFinishTrendDataObject
+                {
+                    ProjectId = _projectId,
+                    ScenarioId = _scenarioId,
+                    DataDate = hitRate.DataDate,
+                    Total = hitRate.Total,
+                    StartedLate = hitRate.StartedLate,
+                    FinishedLate = hitRate.FinishedLate,
+                    DidNotStart = hitRate.DidNotStart,
+                    DidNotFinish = hitRate.DidNotFinish,
+                    StartedOnTime = hitRate.StartedOnTime,
+                    FinishedOnTime = hitRate.FinishedOnTime,
+                    StartedOnTimeHitRate = hitRate.StartedOnTimeHitRate,
+                    FinishedOnTimeHitRate = hitRate.FinishedOnTimeHitRate,
+                    TotalOnTimeHitRate = hitRate.TotalOnTimeHitRate
+                };
+                yield return enrichedHitRate;
             }
         }
     }

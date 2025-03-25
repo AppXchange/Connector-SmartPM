@@ -1,36 +1,53 @@
 namespace Connector.Import.v1.ImportFile.Import;
 
 using Json.Schema.Generation;
-using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.Action;
 
 /// <summary>
-/// Action object that will represent an action in the Xchange system. This will contain an input object type,
-/// an output object type, and a Action failure type (this will default to <see cref="StandardActionFailure"/>
-/// but that can be overridden with your own preferred type). These objects will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Action for importing files into SmartPM
 /// </summary>
-[Description("ImportImportFileAction Action description goes here")]
-public class ImportImportFileAction : IStandardAction<ImportImportFileActionInput, ImportImportFileActionOutput>
+[Description("Import files into a SmartPM project")]
+public class ImportImportFileAction : IStandardAction<ImportImportFileActionInput, ImportFileDataObject>
 {
     public ImportImportFileActionInput ActionInput { get; set; } = new();
-    public ImportImportFileActionOutput ActionOutput { get; set; } = new();
+    public ImportFileDataObject ActionOutput { get; set; } = new();
     public StandardActionFailure ActionFailure { get; set; } = new();
 
     public bool CreateRtap => true;
 }
 
-public class ImportImportFileActionInput
+public class ImportFileRequest
 {
+    [JsonPropertyName("fileId")]
+    [Description("The fileId provided by the /public/v1/upload endpoint")]
+    [Required]
+    public string FileId { get; set; } = string.Empty;
 
+    [JsonPropertyName("name")]
+    [Description("Name of the schedule being imported")]
+    [Required]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("dataDate")]
+    [Description("Optional data date in the event that the file does not have a data date")]
+    public string? DataDate { get; set; }
 }
 
-public class ImportImportFileActionOutput
+public class ImportImportFileActionInput
 {
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    [JsonPropertyName("files")]
+    [Description("Array of files to import")]
+    [Required]
+    public List<ImportFileRequest> Files { get; set; } = new();
+
+    [JsonPropertyName("sendNotification")]
+    [Description("Send a notification whenever the delay analysis has completed")]
+    public bool SendNotification { get; set; }
+
+    [JsonPropertyName("projectId")]
+    [Description("The project to import the files into")]
+    [Required]
+    public string ProjectId { get; set; } = string.Empty;
 }

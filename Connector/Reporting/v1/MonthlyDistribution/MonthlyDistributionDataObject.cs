@@ -2,23 +2,49 @@ namespace Connector.Reporting.v1.MonthlyDistribution;
 
 using Json.Schema.Generation;
 using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.CacheWriter;
 
 /// <summary>
-/// Data object that will represent an object in the Xchange system. This will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Data object representing monthly distribution of activities for a project scenario
 /// </summary>
-[PrimaryKey("id", nameof(Id))]
-//[AlternateKey("alt-key-id", nameof(CompanyId), nameof(EquipmentNumber))]
-[Description("Example description of the object.")]
+[PrimaryKey("projectId,scenarioId,date", nameof(ProjectId), nameof(ScenarioId), nameof(Date))]
+[Description("SmartPM Monthly Distribution data object representing activity distribution data.")]
 public class MonthlyDistributionDataObject
 {
-    [JsonPropertyName("id")]
-    [Description("Example primary key of the object")]
+    [JsonPropertyName("projectId")]
+    [Description("The Project ID containing the scenario")]
     [Required]
-    public required Guid Id { get; init; }
+    public string ProjectId { get; init; } = string.Empty;
+
+    [JsonPropertyName("scenarioId")]
+    [Description("The Scenario ID for the distribution data")]
+    [Required]
+    public string ScenarioId { get; init; } = string.Empty;
+
+    [JsonPropertyName("date")]
+    [Description("The date for the distribution data")]
+    [Required]
+    public string Date { get; init; } = string.Empty;
+
+    [JsonPropertyName("baselineStarts")]
+    [Description("Number of activities that should start according to baseline")]
+    [Required]
+    public int BaselineStarts { get; init; }
+
+    [JsonPropertyName("baselineFinishes")]
+    [Description("Number of activities that should finish according to baseline")]
+    [Required]
+    public int BaselineFinishes { get; init; }
+
+    [JsonPropertyName("currentStarts")]
+    [Description("Number of activities that currently start")]
+    [Required]
+    public int CurrentStarts { get; init; }
+
+    [JsonPropertyName("currentFinishes")]
+    [Description("Number of activities that currently finish")]
+    [Required]
+    public int CurrentFinishes { get; init; }
 }

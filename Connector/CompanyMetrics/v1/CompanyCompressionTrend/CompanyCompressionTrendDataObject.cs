@@ -1,24 +1,38 @@
 namespace Connector.CompanyMetrics.v1.CompanyCompressionTrend;
 
 using Json.Schema.Generation;
-using System;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.CacheWriter;
 
 /// <summary>
-/// Data object that will represent an object in the Xchange system. This will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Data object representing company compression trend information from the SmartPM API.
 /// </summary>
-[PrimaryKey("id", nameof(Id))]
-//[AlternateKey("alt-key-id", nameof(CompanyId), nameof(EquipmentNumber))]
-[Description("Example description of the object.")]
+[PrimaryKey("companyId,periodType,periodLabel", nameof(CompanyId), nameof(PeriodType), nameof(PeriodLabel))]
+[Description("SmartPM Company Compression Trend data object representing compression metrics over time.")]
 public class CompanyCompressionTrendDataObject
 {
-    [JsonPropertyName("id")]
-    [Description("Example primary key of the object")]
+    [JsonPropertyName("companyId")]
+    [Description("The Company ID for the compression trend data")]
     [Required]
-    public required Guid Id { get; init; }
+    public string CompanyId { get; init; } = string.Empty;
+
+    [JsonPropertyName("periodType")]
+    [Description("The type of period for the trend data (BY_MONTH or BY_PERIOD)")]
+    [Required]
+    public string PeriodType { get; init; } = string.Empty;
+
+    [JsonPropertyName("periodLabel")]
+    [Description("Label for the period (e.g., '11/2022')")]
+    [Required]
+    public string PeriodLabel { get; init; } = string.Empty;
+
+    [JsonPropertyName("scheduleCompression")]
+    [Description("Schedule compression value for the period")]
+    [Required]
+    public decimal ScheduleCompression { get; init; }
+
+    [JsonPropertyName("indicator")]
+    [Description("Performance indicator (e.g., 'GOOD', 'BAD')")]
+    [Required]
+    public string Indicator { get; init; } = string.Empty;
 }

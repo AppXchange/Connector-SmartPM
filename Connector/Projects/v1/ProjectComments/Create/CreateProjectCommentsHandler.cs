@@ -2,7 +2,9 @@ using Connector.Client;
 using ESR.Hosting.Action;
 using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -16,68 +18,124 @@ namespace Connector.Projects.v1.ProjectComments.Create;
 public class CreateProjectCommentsHandler : IActionHandler<CreateProjectCommentsAction>
 {
     private readonly ILogger<CreateProjectCommentsHandler> _logger;
+    private readonly IApiClient _apiClient;
 
     public CreateProjectCommentsHandler(
-        ILogger<CreateProjectCommentsHandler> logger)
+        ILogger<CreateProjectCommentsHandler> logger,
+        IApiClient apiClient)
     {
         _logger = logger;
+        _apiClient = apiClient;
     }
     
     public async Task<ActionHandlerOutcome> HandleQueuedActionAsync(ActionInstance actionInstance, CancellationToken cancellationToken)
     {
         var input = JsonSerializer.Deserialize<CreateProjectCommentsActionInput>(actionInstance.InputJson);
+        if (input == null)
+        {
+            return ActionHandlerOutcome.Failed(new StandardActionFailure
+            {
+                Code = "400",
+                Errors = new[]
+                {
+                    new Xchange.Connector.SDK.Action.Error
+                    {
+                        Source = new[] { "CreateProjectCommentsHandler" },
+                        Text = "Invalid input data"
+                    }
+                }
+            });
+        }
+
         try
         {
-            // Given the input for the action, make a call to your API/system
-            var response = new ApiResponse<CreateProjectCommentsActionOutput>();
-            // response = await _apiClient.PostProjectCommentsDataObject(input, cancellationToken)
-            // .ConfigureAwait(false);
+            var response = await _apiClient.CreateProjectCommentAsync(input.ProjectId, input.Notes, cancellationToken)
+                .ConfigureAwait(false);
 
-            // The full record is needed for SyncOperations. If the endpoint used for the action returns a partial record (such as only returning the ID) then you can either:
-            // - Make a GET call using the ID that was returned
-            // - Add the ID property to your action input (Assuming this results in the proper data object shape)
+            if (!response.IsSuccessful)
+            {
+                return ActionHandlerOutcome.Failed(new StandardActionFailure
+                {
+                    Code = ((int)response.StatusCode).ToString(),
+                    Errors = new[]
+                    {
+                        new Xchange.Connector.SDK.Action.Error
+                        {
+                            Source = new[] { "CreateProjectCommentsHandler" },
+                            Text = response.ErrorMessage ?? "Failed to create project comment"
+                        }
+                    }
+                });
+            }
 
-            // var resource = await _apiClient.GetProjectCommentsDataObject(response.Data.id, cancellationToken);
+            var output = new CreateProjectCommentsActionOutput
+            {
+                Comments = response.GetData()?.Select(c => new ProjectCommentResponse
+                {
+                    Notes = c.Notes,
+                    User = c.User,
+                    CreatedAt = c.CreatedAt
+                }).ToList() ?? new List<ProjectCommentResponse>()
+            };
 
-            // var resource = new CreateProjectCommentsActionOutput
-            // {
-            //      TODO : map
-            // };
-
-            // If the response is already the output object for the action, you can use the response directly
-
-            // Build sync operations to update the local cache as well as the Xchange cache system (if the data type is cached)
-            // For more information on SyncOperations and the KeyResolver, check: https://trimble-xchange.github.io/connector-docs/guides/creating-actions/#keyresolver-and-the-sync-cache-operations
+            // Create sync operations for the new comment
             var operations = new List<SyncOperation>();
-            var keyResolver = new DefaultDataObjectKey();
-            var key = keyResolver.BuildKeyResolver()(response.Data);
-            operations.Add(SyncOperation.CreateSyncOperation(UpdateOperation.Upsert.ToString(), key.UrlPart, key.PropertyNames, response.Data));
+            foreach (var comment in output.Comments)
+            {
+                var commentObject = new ProjectCommentsDataObject
+                {
+                    Id = Guid.NewGuid(),
+                    Notes = comment.Notes,
+                    User = comment.User,
+                    CreatedAt = comment.CreatedAt,
+                    ProjectId = int.Parse(input.ProjectId)
+                };
+
+                var keyResolver = new DefaultDataObjectKey();
+                var key = keyResolver.BuildKeyResolver()(commentObject);
+                operations.Add(SyncOperation.CreateSyncOperation(UpdateOperation.Upsert.ToString(), key.UrlPart, key.PropertyNames, commentObject));
+            }
 
             var resultList = new List<CacheSyncCollection>
             {
-                new CacheSyncCollection() { DataObjectType = typeof(ProjectCommentsDataObject), CacheChanges = operations.ToArray() }
+                new() { DataObjectType = typeof(ProjectCommentsDataObject), CacheChanges = operations.ToArray() }
             };
 
-            return ActionHandlerOutcome.Successful(response.Data, resultList);
+            return ActionHandlerOutcome.Successful(output, resultList);
         }
         catch (HttpRequestException exception)
         {
-            // If an error occurs, we want to create a failure result for the action that matches
-            // the failure type for the action. 
-            // Common to create extension methods to map to Standard Action Failure
-
             var errorSource = new List<string> { "CreateProjectCommentsHandler" };
-            if (string.IsNullOrEmpty(exception.Source)) errorSource.Add(exception.Source!);
+            if (!string.IsNullOrEmpty(exception.Source))
+            {
+                errorSource.Add(exception.Source);
+            }
             
             return ActionHandlerOutcome.Failed(new StandardActionFailure
             {
                 Code = exception.StatusCode?.ToString() ?? "500",
-                Errors = new []
+                Errors = new[]
                 {
                     new Xchange.Connector.SDK.Action.Error
                     {
                         Source = errorSource.ToArray(),
                         Text = exception.Message
+                    }
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while creating project comment");
+            return ActionHandlerOutcome.Failed(new StandardActionFailure
+            {
+                Code = "500",
+                Errors = new[]
+                {
+                    new Xchange.Connector.SDK.Action.Error
+                    {
+                        Source = new[] { "CreateProjectCommentsHandler" },
+                        Text = "An unexpected error occurred"
                     }
                 }
             });

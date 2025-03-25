@@ -41,32 +41,32 @@ namespace Connector.Connections
                 {
                     Success = true,
                     Message = "Successful test.",
-                    StatusCode = response.StatusCode
+                    StatusCode = (int)response.StatusCode
                 };
             }
 
-            switch (response.StatusCode)
+            switch ((int)response.StatusCode)
             {
                 case 403:
                     return new TestConnectionResult()
                     {
                         Success = false,
                         Message = "Invalid Credentials: Forbidden.",
-                        StatusCode = response.StatusCode
+                        StatusCode = (int)response.StatusCode
                     };
                 case 401:
                     return new TestConnectionResult()
                     {
                         Success = false,
                         Message = "Invalid Credentials: Unauthorized",
-                        StatusCode = response.StatusCode
+                        StatusCode = (int)response.StatusCode
                     };
                 default:
                     return new TestConnectionResult()
                     {
                         Success = false,
                         Message = "Unknown Issue.",
-                        StatusCode = response.StatusCode
+                        StatusCode = (int)response.StatusCode
                     };
             }
         }

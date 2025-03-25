@@ -1,9 +1,8 @@
 using Connector.Client;
-using System;
 using ESR.Hosting.CacheWriter;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Xchange.Connector.SDK.CacheWriter;
@@ -14,65 +13,67 @@ namespace Connector.Projects.v1.SpecificProjectActivityCodeType;
 public class SpecificProjectActivityCodeTypeDataReader : TypedAsyncDataReaderBase<SpecificProjectActivityCodeTypeDataObject>
 {
     private readonly ILogger<SpecificProjectActivityCodeTypeDataReader> _logger;
-    private int _currentPage = 0;
+    private readonly IApiClient _apiClient;
+    private readonly string _projectId;
+    private readonly string _activityCodeTypeId;
+    private readonly string _activityCodeId;
 
     public SpecificProjectActivityCodeTypeDataReader(
-        ILogger<SpecificProjectActivityCodeTypeDataReader> logger)
+        ILogger<SpecificProjectActivityCodeTypeDataReader> logger,
+        IApiClient apiClient,
+        string projectId,
+        string activityCodeTypeId,
+        string activityCodeId)
     {
         _logger = logger;
+        _apiClient = apiClient;
+        _projectId = projectId;
+        _activityCodeTypeId = activityCodeTypeId;
+        _activityCodeId = activityCodeId;
     }
 
-    public override async IAsyncEnumerable<SpecificProjectActivityCodeTypeDataObject> GetTypedDataAsync(DataObjectCacheWriteArguments ? dataObjectRunArguments, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<SpecificProjectActivityCodeTypeDataObject> GetTypedDataAsync(
+        DataObjectCacheWriteArguments? dataObjectRunArguments,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        while (true)
-        {
-            var response = new ApiResponse<PaginatedResponse<SpecificProjectActivityCodeTypeDataObject>>();
-            // If the SpecificProjectActivityCodeTypeDataObject does not have the same structure as the SpecificProjectActivityCodeType response from the API, create a new class for it and replace SpecificProjectActivityCodeTypeDataObject with it.
-            // Example:
-            // var response = new ApiResponse<IEnumerable<SpecificProjectActivityCodeTypeResponse>>();
+        SpecificProjectActivityCodeTypeDataObject? activityCode = null;
 
-            // Make a call to your API/system to retrieve the objects/type for the connector's configuration.
-            try
-            {
-                //response = await _apiClient.GetRecords<SpecificProjectActivityCodeTypeDataObject>(
-                //    relativeUrl: "specificProjectActivityCodeTypes",
-                //    page: _currentPage,
-                //    cancellationToken: cancellationToken)
-                //    .ConfigureAwait(false);
-            }
-            catch (HttpRequestException exception)
-            {
-                _logger.LogError(exception, "Exception while making a read request to data object 'SpecificProjectActivityCodeTypeDataObject'");
-                throw;
-            }
+        try
+        {
+            var response = await _apiClient.GetSpecificProjectActivityCodeTypeAsync(
+                _projectId,
+                _activityCodeTypeId,
+                _activityCodeId,
+                cancellationToken)
+                .ConfigureAwait(false);
 
             if (!response.IsSuccessful)
             {
-                throw new Exception($"Failed to retrieve records for 'SpecificProjectActivityCodeTypeDataObject'. API StatusCode: {response.StatusCode}");
+                throw new Exception($"Failed to retrieve specific project activity code. API StatusCode: {response.StatusCode}, Error: {response.ErrorMessage}");
             }
 
-            if (response.Data == null || !response.Data.Items.Any()) break;
-
-            // Return the data objects to Cache.
-            foreach (var item in response.Data.Items)
-            {
-                // If new class was created to match the API response, create a new SpecificProjectActivityCodeTypeDataObject object, map the properties and return a SpecificProjectActivityCodeTypeDataObject.
-
-                // Example:
-                //var resource = new SpecificProjectActivityCodeTypeDataObject
-                //{
-                //// TODO: Map properties.      
-                //};
-                //yield return resource;
-                yield return item;
-            }
-
-            // Handle pagination per API client design
-            _currentPage++;
-            if (_currentPage >= response.Data.TotalPages)
-            {
-                break;
-            }
+            activityCode = response.GetData();
         }
+        catch (HttpRequestException exception)
+        {
+            _logger.LogError(exception, "Exception while fetching specific activity code for project {ProjectId}, activity code type {ActivityCodeTypeId}, activity code {ActivityCodeId}",
+                _projectId, _activityCodeTypeId, _activityCodeId);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while fetching specific activity code for project {ProjectId}, activity code type {ActivityCodeTypeId}, activity code {ActivityCodeId}",
+                _projectId, _activityCodeTypeId, _activityCodeId);
+            throw;
+        }
+
+        if (activityCode == null)
+        {
+            _logger.LogInformation("No activity code found for project {ProjectId}, activity code type {ActivityCodeTypeId}, activity code {ActivityCodeId}",
+                _projectId, _activityCodeTypeId, _activityCodeId);
+            yield break;
+        }
+
+        yield return activityCode;
     }
 }

@@ -1,24 +1,23 @@
 namespace Connector.Import.v1.ImportStatus;
 
 using Json.Schema.Generation;
-using System;
 using System.Text.Json.Serialization;
 using Xchange.Connector.SDK.CacheWriter;
 
 /// <summary>
-/// Data object that will represent an object in the Xchange system. This will be converted to a JsonSchema, 
-/// so add attributes to the properties to provide any descriptions, titles, ranges, max, min, etc... 
-/// These types will be used for validation at runtime to make sure the objects being passed through the system 
-/// are properly formed. The schema also helps provide integrators more information for what the values 
-/// are intended to be.
+/// Data object representing import status information from SmartPM
 /// </summary>
-[PrimaryKey("id", nameof(Id))]
-//[AlternateKey("alt-key-id", nameof(CompanyId), nameof(EquipmentNumber))]
-[Description("Example description of the object.")]
+[PrimaryKey("importId", nameof(ImportId))]
+[Description("SmartPM Import Status data object representing the status of a file import.")]
 public class ImportStatusDataObject
 {
-    [JsonPropertyName("id")]
-    [Description("Example primary key of the object")]
+    [JsonPropertyName("message")]
+    [Description("Status message of the import")]
     [Required]
-    public required Guid Id { get; init; }
+    public string Message { get; init; } = string.Empty;
+
+    [JsonPropertyName("importId")]
+    [Description("Unique identifier for the import")]
+    [Required]
+    public string ImportId { get; init; } = string.Empty;
 }
