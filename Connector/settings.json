@@ -1,7 +1,7 @@
 {
   "name": "SmartPM",
-  "urlPart": "smart-pm",
-  "key": "smart-pm",
+  "urlPart": "smartpm",
+  "key": "smartpm",
   "description": "",
   "modules": [
     {
